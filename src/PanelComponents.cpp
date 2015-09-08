@@ -39,7 +39,7 @@ uint8_t PanelSwitch::getState( void )
 //---Button------------------------------------------------------
 PanelButton::PanelButton( void )
 {
-
+	beingHeld = 0;
 }
 
 void PanelButton::init( uint8_t pinNum )
@@ -51,17 +51,63 @@ void PanelButton::init( uint8_t pinNum )
   newData = 1;
 }
 
+//This is the intended operation:
+// Button is pressed. If it has been long enough since last movement:
+//   update newData
+//   clear timer
+// If This has already been done, check for button held.  If so,
+//   update newData
+//   clear timer
 void PanelButton::update( void )
 {
-  uint8_t tempState = digitalRead( pinNumber ) ^ 0x01;
-  if(( state != tempState ) && (buttonDebounceTimeKeeper.mGet() > 50))
-  {
-	//  Serial.println(buttonDebounceTimeKeeper.mGet());
-    state = tempState;
-    newData = 1;
-	//Start the timer
-	buttonDebounceTimeKeeper.mClear();
-  }
+	uint8_t tempState = digitalRead( pinNumber ) ^ 0x01;
+	switch( state )
+	{
+	case 0: //Last state was 0
+	case 1: //Last state was 1
+		if(( state != tempState ) && (buttonDebounceTimeKeeper.mGet() > 50))
+		{
+			//  Serial.println(buttonDebounceTimeKeeper.mGet());
+			state = tempState;
+			newData = 1;
+			//Start the timer
+			buttonDebounceTimeKeeper.mClear();
+			if( tempState == 1 )
+			{
+				//Ok, we are being held down
+				beingHeld = 1;
+			}
+		}
+		if(( tempState == 1 )&&( beingHeld == 1 ))
+		{
+			//We're being held
+			if(buttonDebounceTimeKeeper.mGet() > 1000)
+			{
+			newData = 1;
+			state = 2;//BUTTONHOLD;
+			//Serial.println("Got it.");
+			}
+			else
+			{
+				//Serial.println("WAITING!!!");
+			}
+		}
+		break;
+	case 2: //In the process of holding
+		if(( tempState == 0) && ( state != tempState ) && (buttonDebounceTimeKeeper.mGet() > 50))
+		{
+		  //  Serial.println(buttonDebounceTimeKeeper.mGet());
+		  state = tempState;
+		  newData = 1;
+		//Start the timer
+		buttonDebounceTimeKeeper.mClear();
+		beingHeld = 0;
+		}
+		break;
+	default:
+		break;
+	}
+
 }
 
 uint8_t PanelButton::getState( void )

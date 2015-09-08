@@ -21,7 +21,7 @@
 // #define UNSERVICED 2
 
 
-#define MAXTIMER 60000000
+//#define MAXTIMER 60000000
 
 //Classes
 class TimeKeeper32

@@ -13,6 +13,7 @@
 
 //Includes
 #include "timeKeeper.h"
+#include "timerModule.h"
 
 //**********************************************************************//
 //

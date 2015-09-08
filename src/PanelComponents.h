@@ -20,6 +20,13 @@ private:
 };
 
 //---Button------------------------------------------------------
+enum buttonState_t
+{
+  BUTTONOFF,
+  BUTTONON,
+  BUTTONHOLD,
+};
+
 class PanelButton
 {
 public:
@@ -35,6 +42,7 @@ public:
   uint8_t newData;
 protected:
 private:
+  uint8_t beingHeld;
 };
 
 //---Led---------------------------------------------------------
