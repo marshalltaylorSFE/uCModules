@@ -22,9 +22,9 @@ private:
 //---Button------------------------------------------------------
 enum buttonState_t
 {
-  BUTTONOFF = 0,
-  BUTTONON = 1,
-  BUTTONHOLD = 2,
+  BUTTONOFF,
+  BUTTONON,
+  BUTTONHOLD,
 };
 
 class PanelButton
@@ -35,7 +35,6 @@ public:
   PanelButton( void );
   void update( void );
   void init( uint8_t );
-  void init( uint8_t, uint8_t );
   uint8_t getState( void );
   void setBank( uint8_t );
   uint8_t state;
@@ -52,10 +51,10 @@ private:
 //---Led---------------------------------------------------------
 enum ledState_t
 {
-  LEDON = 0,
-  LEDOFF = 1,
-  LEDFLASHING = 2,
-  LEDFLASHINGFAST = 3
+  LEDOFF,
+  LEDON,
+  LEDFLASHING,
+  LEDFLASHINGFAST
 };
 
 class PanelLed
@@ -64,8 +63,6 @@ public:
   PanelLed( void );
   void update( void );
   void init( uint8_t );
-  void init( uint8_t, uint8_t );
-  void init( uint8_t, uint8_t, volatile uint8_t * volatile , volatile uint8_t * volatile );
   ledState_t getState( void );
   void setState( ledState_t );
   ledState_t state;
@@ -76,9 +73,6 @@ public:
 protected:
 private:
   uint8_t bank;
-  volatile uint8_t * volatile flasherState;
-  volatile uint8_t * volatile fastFlasherState;
-
 };
 
 //---Selector----------------------------------------------------
@@ -96,7 +90,5 @@ public:
 protected:
 private:
 };
-
-
 
 #endif

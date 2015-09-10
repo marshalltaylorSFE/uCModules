@@ -7,25 +7,22 @@
 //  This license block is BeerWare itself.
 //
 //  Written by:  Marshall Taylor
-//  Created:  March 21, 2015
+//  Created:  September 9, 2015
 //
 //**********************************************************************//
-
+#include <Wire.h>
 //**Panels and stuff**************************//
 
 #include "Panel.h"
-#include "PanelComponents.h"
 
 //Panel related variables
 Panel myPanel;
 
 //**Timers and stuff**************************//
+#define MAXINTERVAL 2000 //Max TimerClass interval
 #include "timerModule.h"
-
-//Globals
 IntervalTimer myTimer;
 
-#define MAXINTERVAL 2000 //Max TimerClass interval
 
 //HOW TO OPERATE
 //  Make TimerClass objects for each thing that needs periodic service
@@ -34,10 +31,7 @@ IntervalTimer myTimer;
 //  Set MAXTIMER to overflow number in the header.  MAXTIMER + MAXINTERVAL
 //    cannot exceed variable size.
 
-TimerClass debugTimerClass( 333 );
 TimerClass panelUpdateTimer(10);
-uint8_t debugLedStates = 1;
-
 TimerClass ledToggleTimer( 333 );
 uint8_t ledToggleState = 0;
 TimerClass ledToggleFastTimer( 100 );
@@ -63,252 +57,90 @@ S7sObject rightDisplay( 0x30 );
 // -----------------------------------------------------------------------------
 void setup() 
 {
-  //Initialize serial:
-  Serial.begin(9600);
+	delay(4000);
+	//Initialize serial:
+	Serial.begin(9600);
+	Serial.println("Program Started");
 
-  //Init panel.h stuff
-  myPanel.init();
-  
-  // initialize IntervalTimer
-  myTimer.begin(serviceMS, 1000);  // serviceMS to run every 0.001 seconds
-  
-  //Debug setting of random states and stuff
-  
-  //Set all LED off
-  myPanel.recordLed.setState(LEDOFF);
-  myPanel.playLed.setState(LEDOFF);
-  myPanel.overdubLed.setState(LEDOFF);
-  myPanel.tapLed.setState(LEDOFF);
-  myPanel.syncLed.setState(LEDOFF);
+	// initialize IntervalTimer
+	myTimer.begin(serviceMS, 1000);  // serviceMS to run every 0.001 seconds
 
-  myPanel.update();
-  
-  //while(1);
-  
-  //debugTimeKeeper.mClear();
-  
-  Wire.begin();  // Initialize hardware I2C pins
-  // Clear the displays
-  leftDisplay.clear();  // Clears display, resets cursor
-  leftDisplay.setBrightness(255);  // High brightness
-  sprintf(tempString, "%4d", (unsigned int)8888);
-  leftDisplay.SendString(tempString);
+	//Init panel.h stuff
+	myPanel.init();
+	myPanel.update();
 
-  rightDisplay.clear();  // Clears display, resets cursor
-  rightDisplay.setBrightness(255);  // High brightness
-  sprintf(tempString, "%4d", (unsigned int)9999);
-  rightDisplay.SendString(tempString);
+	leftDisplay.clear();  // Clears display, resets cursor
+	leftDisplay.setBrightness(255);  // High brightness
+	sprintf(tempString, "%4d", (unsigned int)8888);
+	leftDisplay.SendString(tempString);
+	
+	rightDisplay.clear();  // Clears display, resets cursor
+	rightDisplay.setBrightness(255);  // High brightness
+	sprintf(tempString, "%4d", (unsigned int)9999);
+	rightDisplay.SendString(tempString);	
 
-  
+	//while(1);
 }
 
 void loop()
 {
-//**Copy to make a new timer******************//  
-//    msTimerA.update(msTicks);
-	 debugTimerClass.update(msTicks);
-	 ledToggleTimer.update(msTicks);
-	 ledToggleFastTimer.update(msTicks);
-	 panelUpdateTimer.update(msTicks);
-	 debounceTimer.update(msTicks);
-	 
-//**Copy to make a new timer******************//  
-//  if(msTimerA.flagStatus() == PENDING)
-//  {
-//    digitalWrite( LEDPIN, digitalRead(LEDPIN) ^ 1 );
-//  }
-//**Debounce timer****************************//  
- if(debounceTimer.flagStatus() == PENDING)
- {
-   myPanel.timersMIncrement(5);
-   
- }
+	//**Copy to make a new timer******************//  
+	//msTimerA.update(msTicks);
+	ledToggleTimer.update(msTicks);
+	ledToggleFastTimer.update(msTicks);
+	panelUpdateTimer.update(msTicks);
+	debounceTimer.update(msTicks);
+	
+	//**Copy to make a new timer******************//  
+	//if(msTimerA.flagStatus() == PENDING)
+	//{
+	//	digitalWrite( LEDPIN, digitalRead(LEDPIN) ^ 1 );
+	//}
+	//**Debounce timer****************************//  
+	if(debounceTimer.flagStatus() == PENDING)
+	{
+		myPanel.timersMIncrement(5);
+
+	}
 	
 	//**Update the panel LEDs and stuff***********//  
 	if(panelUpdateTimer.flagStatus() == PENDING)
 	{
 		myPanel.update();
-		//Check for new data  ( does myPanel.memberName.newData == 1? )
-		uint8_t tempStatus = 0;
-		tempStatus |= myPanel.tapButton.newData;
-		tempStatus |= myPanel.syncButton.newData;
-		tempStatus |= myPanel.songUpButton.newData;
-		tempStatus |= myPanel.songDownButton.newData;
-		tempStatus |= myPanel.trackUpButton.newData;
-		tempStatus |= myPanel.trackDownButton.newData;
-		tempStatus |= myPanel.playButton.newData;
-		tempStatus |= myPanel.stopButton.newData;
-		tempStatus |= myPanel.quantizeSelector.newData;
-		
-		
-		// If new, do something fabulous
-		
-		if( tempStatus )
-		{
-			if( myPanel.tapButton.newData == 1 )
-			{
-				if( myPanel.tapButton.getState() == 1 )
-				{
-					Serial.println("Tap");
-					myPanel.tapLed.setState(LEDFLASHING);
-				}
-				else
-				{
-					myPanel.tapLed.setState(LEDOFF);
-				}
-			}
-			if( myPanel.syncButton.newData == 1 )
-			{
-				if( myPanel.syncButton.getState() == 1 )
-				{
-					Serial.println("Sync");
-					myPanel.syncLed.setState(LEDFLASHING);
-				}
-				else
-				{
-					myPanel.syncLed.setState(LEDOFF);
-				}
-			}
-			if( myPanel.songUpButton.newData == 1 )
-			{
-				if( myPanel.songUpButton.getState() == 1 )
-				{
-					Serial.println("songUpButton");
-					myPanel.overdubLed.setState(LEDFLASHINGFAST);
-				}
-			}
-			if( myPanel.songDownButton.newData == 1 )
-			{
-				if( myPanel.songDownButton.getState() == 1 )
-				{
-					Serial.println("songDownButton");
-					myPanel.tapLed.setState(LEDFLASHINGFAST);
-					myPanel.syncLed.setState(LEDFLASHINGFAST);
-				}
-			}
-			if( myPanel.trackUpButton.newData == 1 )
-			{
-				if( myPanel.trackUpButton.getState() == 1 )
-				{
-					Serial.println("trackUpButton");
-					myPanel.recordLed.setState(LEDFLASHING);
-				}
-			}
-			if( myPanel.trackDownButton.newData == 1 )
-			{
-				if( myPanel.trackDownButton.getState() == 1 )
-				{
-					Serial.println("trackDownButton");
-					myPanel.playLed.setState(LEDFLASHING);
-				}
-			}
-			if( myPanel.playButton.newData == 1 )
-			{
-				if( myPanel.playButton.getState() == 1 )
-				{
-					Serial.println("Play");
-					//int i;
-					//for( i = 0; i < 9; i++ )
-					//{
-					//	Serial.println(myPanel.quantizeSelector.thresholds[i]);
-					//}
-					
-					//Set all LED on
-					myPanel.recordLed.setState(LEDON);
-					myPanel.playLed.setState(LEDON);
-					myPanel.overdubLed.setState(LEDON);
-					myPanel.tapLed.setState(LEDON);
-					myPanel.syncLed.setState(LEDON);
-				}
-			}
-			if( myPanel.stopButton.newData == 1 )
-			{
-				if( myPanel.stopButton.getState() == 1 )
-				{
-					Serial.println("Stop");
-					
-					//Serial.print("Analog Read: ");
-					//Serial.println( (analogRead( A0 )) >> 2 );
-					
-					//Set all LED off
-					myPanel.recordLed.setState(LEDOFF);
-					myPanel.playLed.setState(LEDOFF);
-					myPanel.overdubLed.setState(LEDOFF);
-					myPanel.tapLed.setState(LEDOFF);
-					myPanel.syncLed.setState(LEDOFF);
-				}
-			}
-			if( myPanel.quantizeSelector.newData == 1 )
-			{
-				Serial.print("Quantitize: ");
-				Serial.println( myPanel.quantizeSelector.getState() + 1 );
-				
-				sprintf(tempString, "%4d", (unsigned int)( myPanel.quantizeSelector.getState() + 1 ));
-				leftDisplay.SendString(tempString);
-				
-				sprintf(tempString, "%4d", (unsigned int)( 9000 - (1000 * myPanel.quantizeSelector.getState()) ));
-				rightDisplay.SendString(tempString);
-			}
-		}
+		sprintf(tempString, "%4d", (unsigned int)myPanel.songNum);
+		leftDisplay.SendString(tempString);
+		sprintf(tempString, "%4d", (unsigned int)myPanel.trackNum);
+		rightDisplay.SendString(tempString);
 	}
 
-
-	if(debugTimerClass.flagStatus() == PENDING)
-	{
-	// if( debugLedStates == 0 )
-	// {
-		// debugLedStates = 1;
-		// //Set all LED off
-		// myPanel.hazardsOffLed.setState(LEDOFF);
-		// myPanel.hazardsActiveLed.setState(LEDOFF);
-		// //myPanel.matchReadyLed.setState(LEDOFF);
-		// myPanel.matchPauseLed.setState(LEDOFF);
-		// myPanel.doorsUnlockLed.setState(LEDOFF);
-		// myPanel.doorsLeftAjarLed.setState(LEDOFF);
-		// myPanel.doorsRightAjarLed.setState(LEDOFF);
-		// //myPanel.update();	   
-	// }
-	// else
-	// {
-		// debugLedStates = 0;
-		// //Set all LED on
-		// myPanel.hazardsOffLed.setState(LEDON);
-		// myPanel.hazardsActiveLed.setState(LEDON);
-		// //myPanel.matchReadyLed.setState(LEDON);
-		// myPanel.matchPauseLed.setState(LEDON);
-		// myPanel.doorsUnlockLed.setState(LEDON);
-		// myPanel.doorsLeftAjarLed.setState(LEDON);
-		// myPanel.doorsRightAjarLed.setState(LEDON);
-		// //myPanel.update();   
-	// }
-	}
-	
-	//**LED toggling of the panel class***********//  
+	//**Fast LED toggling of the panel class***********//  
 	if(ledToggleFastTimer.flagStatus() == PENDING)
 	{
-	ledToggleFastState = ledToggleFastState ^ 0x01;
-	
+		myPanel.toggleFastFlasherState();
+		
 	}
+
+	//**LED toggling of the panel class***********//  
 	if(ledToggleTimer.flagStatus() == PENDING)
 	{
-	ledToggleState = ledToggleState ^ 0x01;
-	
+		myPanel.toggleFlasherState();
+		
 	}
 }
 
 void serviceMS(void)
 {
-  uint32_t returnVar = 0;
-  if(msTicks >= ( MAXTIMER + MAXINTERVAL ))
-  {
-    returnVar = msTicks - MAXTIMER;
+	uint32_t returnVar = 0;
+	if(msTicks >= ( MAXTIMER + MAXINTERVAL ))
+	{
+		returnVar = msTicks - MAXTIMER;
 
-  }
-  else
-  {
-    returnVar = msTicks + 1;
-  }
-  msTicks = returnVar;
-  msTicksMutex = 0;  //unlock
-  
+	}
+	else
+	{
+		returnVar = msTicks + 1;
+	}
+	msTicks = returnVar;
+	msTicksMutex = 0;  //unlock
+
 }
