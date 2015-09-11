@@ -201,18 +201,18 @@ void PanelLed::update( void )
 		break;
 	} 
 
-	Serial.print("A:");
-	Serial.print(*flasherState);
+	//Serial.print("A:");
+	//Serial.print(*flasherState);
 	if( bank == 0 )
 	{
 		digitalWrite( pinNumber, outputValue );
-		Serial.print("B:");
-		Serial.print(*flasherState);
+		//Serial.print("B:");
+		//Serial.print(*flasherState);
 	}
 	if( bank != 0 )
 	{
-		Serial.print("C:");
-		Serial.print(*flasherState);
+		//Serial.print("C:");
+		//Serial.print(*flasherState);
 		cache = outputValue & 0x0001;
 	}
 	
