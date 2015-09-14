@@ -39,6 +39,11 @@ PanelButton::PanelButton( void )
 {
 	beingHeld = 0;
 	bank = 0;
+	risingEdgeFlag = 0;
+	fallingEdgeFlag = 0;
+	holdRisingEdgeFlag = 0;
+	holdFallingEdgeFlag = 0; 
+	
 }
 
 void PanelButton::init( uint8_t pinInput )
@@ -54,8 +59,7 @@ void PanelButton::init( uint8_t pinInput, uint8_t bankInput )
 	{
 		pinMode( pinNumber, INPUT_PULLUP );
 		update();
-		//force newData high in case knob starts on last value
-		newData = 1;
+
 	}
 	else
 	{
@@ -72,70 +76,108 @@ void PanelButton::init( uint8_t pinInput, uint8_t bankInput )
 //   clear timer
 void PanelButton::update( void )
 {
-	uint8_t tempState;
+	uint8_t freshData;
 	if( bank == 0 )
 	{
-		tempState = digitalRead( pinNumber ) ^ 0x01;
+		freshData = digitalRead( pinNumber ) ^ 0x01;
 	}
 	else
 	{
-		tempState = cache ^ 0x01;  //Take externally provided data
+		freshData = cache ^ 0x01;  //Take externally provided data
 	}
 	
+	buttonState_t nextState = state;
 	switch( state )
 	{
-	case 0: //Last state was 0
-	case 1: //Last state was 1
-		if(( state != tempState ) && (buttonDebounceTimeKeeper.mGet() > 50))
+	case BUTTONOFF: //Last state was BUTTONOFF
+		if(( freshData == 1 ) && ( buttonDebounceTimeKeeper.mGet() > 50 ))
 		{
-			//  Serial.println(buttonDebounceTimeKeeper.mGet());
-			state = tempState;
-			newData = 1;
 			//Start the timer
 			buttonDebounceTimeKeeper.mClear();
-			if( tempState == 1 )
-			{
-				//Ok, we are being held down
-				beingHeld = 1;
-			}
+			nextState = BUTTONON;
+			risingEdgeFlag = 1;
 		}
-		if(( tempState == 1 )&&( beingHeld == 1 ))
+		else
 		{
-			//We're being held
-			if(buttonDebounceTimeKeeper.mGet() > 1000)
-			{
-				newData = 1;
-				state = 2;//BUTTONHOLD;
-				//Serial.println("Got it.");
-			}
-			else
-			{
-				//Serial.println("WAITING!!!");
-			}
+			nextState = BUTTONOFF;
 		}
 		break;
-	case 2: //In the process of holding
-		if(( tempState == 0) && ( state != tempState ) && (buttonDebounceTimeKeeper.mGet() > 50))
+	case BUTTONON: //Last state was BUTTONON
+		if( freshData == 1 )
 		{
-			//  Serial.println(buttonDebounceTimeKeeper.mGet());
-			state = tempState;
-			newData = 1;
-			//Start the timer
+			if( buttonDebounceTimeKeeper.mGet() > 1000 )
+			{
+				nextState = BUTTONHOLD;
+				holdRisingEdgeFlag = 1;
+			}
+		}
+		//No break;, do buttonhold's state too
+	case BUTTONHOLD: //In the process of holding
+		if( freshData == 0 )
+		{
 			buttonDebounceTimeKeeper.mClear();
-			beingHeld = 0;
+			nextState = BUTTONOFF;
 		}
 		break;
 	default:
 		break;
 	}
+	
+	state = nextState;
 
 }
 
-uint8_t PanelButton::getState( void )
+buttonState_t PanelButton::getState( void )
 {
-	newData = 0;
-
 	return state;
+}
+
+uint8_t PanelButton::serviceRisingEdge( void )
+{
+	uint8_t returnVar = 0;
+	if( risingEdgeFlag == 1 )
+	{
+		risingEdgeFlag = 0;
+		returnVar = 1;
+	}
+	
+	return returnVar;
+}
+
+uint8_t PanelButton::serviceFallingEdge( void )
+{
+	uint8_t returnVar = 0;
+	if( fallingEdgeFlag == 1 )
+	{
+		fallingEdgeFlag = 0;
+		returnVar = 1;
+	}
+	
+	return returnVar;
+}
+
+uint8_t PanelButton::serviceHoldRisingEdge( void )
+{
+	uint8_t returnVar = 0;
+	if( holdRisingEdgeFlag == 1 )
+	{
+		holdRisingEdgeFlag = 0;
+		returnVar = 1;
+	}
+	
+	return returnVar;
+}
+
+uint8_t PanelButton::serviceHoldFallingEdge( void )
+{
+	uint8_t returnVar = 0;
+	if( holdFallingEdgeFlag == 1 )
+	{
+		holdFallingEdgeFlag = 0;
+		returnVar = 1;
+	}
+	
+	return returnVar;
 }
 
 void PanelButton::setBank( uint8_t newBank )
@@ -154,6 +196,7 @@ PanelLed::PanelLed( void )
 void PanelLed::init( uint8_t pinInput )
 {
 	init( pinInput, 0 );
+	
 }
 
 void PanelLed::init( uint8_t pinInput, uint8_t bankInput )
@@ -169,7 +212,7 @@ void PanelLed::init( uint8_t pinInput, uint8_t bankInput )
 	{
 		//Do bank related initialization here
 	}
-
+	Serial.println((uint32_t)flasherState, HEX);
 }
 
 void PanelLed::init( uint8_t pinInput, uint8_t bankInput, volatile uint8_t * volatile flasherAddress, volatile uint8_t * volatile fastFlasherAddress )
@@ -287,4 +330,115 @@ uint8_t PanelSelector::getState( void )
 	newData = 0;
 
 	return state;
+}
+
+
+//---Seven Segment Display---------------------------------------
+sSDisplay::sSDisplay( void )
+{
+	state = SSOFF;
+	updateDisplayFlag = 0;
+	lastFlasherState = 0;
+
+}
+
+void sSDisplay::init( uint8_t addressInput )
+{
+	i2cAddress = addressInput;
+	clear();  // Clears display, resets cursor
+	setBrightness(255);  // High brightness
+	//sprintf(tempString, "%4d", (unsigned int)8888);
+	SendString("    ");
+
+}
+
+void sSDisplay::init( uint8_t addressInput, volatile uint8_t * volatile flasherAddress, volatile uint8_t * volatile fastFlasherAddress )
+{
+	flasherState = flasherAddress;
+	fastFlasherState = fastFlasherAddress;
+	
+	init( addressInput ); //Do regular init, plus
+	Serial.println((uint32_t)flasherState, HEX);	
+}
+
+
+void sSDisplay::update( void )
+{
+	uint8_t outputValue = 0;
+	switch(state)
+	{
+	case SSOFF:
+		outputValue = 0;
+		break;
+	case SSFLASHING:
+		outputValue = *flasherState;
+		if( outputValue != lastFlasherState )
+		{
+			updateDisplayFlag = 1;
+		}
+		lastFlasherState = outputValue;
+		break;
+	case SSLASHINGFAST:
+		outputValue = *fastFlasherState;
+		if( outputValue != lastFlasherState )
+		{
+			updateDisplayFlag = 1;
+		}
+		lastFlasherState = outputValue;
+		break;
+	default:
+	case SSON:
+		outputValue = 1;
+		break;
+	}
+	if( updateDisplayFlag == 1 )
+	{
+		if( outputValue == 0 )
+		{
+			clear();
+		}
+		if( outputValue == 1 )
+		{
+			SendString(data);
+		}
+		updateDisplayFlag = 0;
+		//Serial.print("Thing");
+	}
+	
+
+}
+
+sSDisplayState_t sSDisplay::getState( void )
+{
+	return state;
+
+}
+
+void sSDisplay::setState( sSDisplayState_t inputValue )
+{
+	state = inputValue;
+
+}
+
+void sSDisplay::setData( String toSet )
+{
+	uint8_t differences = 0;
+	for( int i = 0; i < 4; i++ )
+	{
+		if( toSet[i] != data[i] )
+		{
+			differences++;
+		}
+	}
+	if( differences != 0 )
+	{
+		for( int i = 0; i < 4; i++ )
+		{	
+			data[i] = toSet[i];
+		}
+		data[4] = '\0';
+		updateDisplayFlag = 1;
+	}
+
+	
 }

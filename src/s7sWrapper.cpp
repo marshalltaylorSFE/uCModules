@@ -2,9 +2,9 @@
 #include "s7sWrapper.h"
 
 //Constructor
-S7sObject::S7sObject( byte inputAddress )
+S7sObject::S7sObject( void )
 {
-	i2cAddress = inputAddress;
+	i2cAddress = 0x71;
 }
 
 // This custom function works somewhat like a serial.print.
