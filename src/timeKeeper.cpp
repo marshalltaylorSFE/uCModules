@@ -15,6 +15,8 @@
 #include "timeKeeper.h"
 #include "timerModule.h"
 
+#define MAXTIMER 60000
+
 //**********************************************************************//
 //
 //  Time Keeper

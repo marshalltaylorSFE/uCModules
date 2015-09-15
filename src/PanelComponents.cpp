@@ -212,7 +212,7 @@ void PanelLed::init( uint8_t pinInput, uint8_t bankInput )
 	{
 		//Do bank related initialization here
 	}
-	Serial.println((uint32_t)flasherState, HEX);
+	//Serial.println((uint32_t)flasherState, HEX);
 }
 
 void PanelLed::init( uint8_t pinInput, uint8_t bankInput, volatile uint8_t * volatile flasherAddress, volatile uint8_t * volatile fastFlasherAddress )
@@ -283,7 +283,7 @@ void PanelLed::setBank( uint8_t inputBank )
 //---Selector----------------------------------------------------
 PanelSelector::PanelSelector( void )
 {
-
+	changedFlag = 0;
 }
 
 // 8 bit resolution on the ADC should be fine.  Right shift on analogRead
@@ -300,19 +300,19 @@ void PanelSelector::init( uint8_t pinNum, uint8_t maxInput, uint8_t minInput )
 		thresholds[i] = thresholds[i - 1] + stepHeight;
 	}
 	update();
-	//force newData high in case knob starts on last value
-	newData = 1;
+	//force changedFlag high in case knob starts on last value
+	//changedFlag = 1;
 }
 
 void PanelSelector::update( void )
 {
-	uint8_t analogReadRaw = (analogRead( pinNumber )) >> 2;  //Now 8 bits
+	uint8_t freshData = (analogRead( pinNumber )) >> 2;  //Now 8 bits
 	uint8_t tempState = 0;
 	//Seek the position
 	int i;
 	for( i = 0; i < 9; i++ )
 	{
-		if( analogReadRaw > thresholds[i] )
+		if( freshData > thresholds[i] )
 		{
 			tempState = i + 1; //It's this or higher
 		}
@@ -321,17 +321,26 @@ void PanelSelector::update( void )
 	if( state != tempState )
 	{
 		state = tempState;
-		newData = 1;
+		changedFlag = 1;
 	}
 }
 
 uint8_t PanelSelector::getState( void )
 {
-	newData = 0;
-
 	return state;
 }
 
+uint8_t PanelSelector::serviceChanged( void )
+{
+	uint8_t returnVar = 0;
+	if( changedFlag == 1 )
+	{
+		changedFlag = 0;
+		returnVar = 1;
+	}
+	
+	return returnVar;
+}
 
 //---Seven Segment Display---------------------------------------
 sSDisplay::sSDisplay( void )
@@ -339,7 +348,9 @@ sSDisplay::sSDisplay( void )
 	state = SSOFF;
 	updateDisplayFlag = 0;
 	lastFlasherState = 0;
-
+	peekThroughFlag = 0;
+	peekingFlag = 0;
+	peekThroughTime = 1000;
 }
 
 void sSDisplay::init( uint8_t addressInput )
@@ -358,13 +369,16 @@ void sSDisplay::init( uint8_t addressInput, volatile uint8_t * volatile flasherA
 	fastFlasherState = fastFlasherAddress;
 	
 	init( addressInput ); //Do regular init, plus
-	Serial.println((uint32_t)flasherState, HEX);	
 }
 
 
 void sSDisplay::update( void )
 {
 	uint8_t outputValue = 0;
+
+
+
+	//Serial.println( state, HEX );
 	switch(state)
 	{
 	case SSOFF:
@@ -391,8 +405,33 @@ void sSDisplay::update( void )
 		outputValue = 1;
 		break;
 	}
+	
+	if( peekThroughFlag == 1 )
+	{
+		peekThroughFlag = 0;
+		peekingFlag = 1;
+		peekThroughTimeKeeper.mClear();
+		Serial.print("CLEARED!");
+	}
+	if( peekingFlag == 1)
+	{
+		if( peekThroughTimeKeeper.mGet() > peekThroughTime )
+		{
+			peekingFlag = 0;
+			updateDisplayFlag = 1;
+		}
+		else
+		{
+			updateDisplayFlag = 1;
+			outputValue = 2;
+			//Serial.print(peekThroughTimeKeeper.mGet());
+		}
+		Serial.print("state: ");
+		Serial.println(state);
+	}
 	if( updateDisplayFlag == 1 )
 	{
+
 		if( outputValue == 0 )
 		{
 			clear();
@@ -401,8 +440,14 @@ void sSDisplay::update( void )
 		{
 			SendString(data);
 		}
+		if( outputValue == 2 )
+		{
+			SendString(peekThroughData);
+		}
+		
 		updateDisplayFlag = 0;
 		//Serial.print("Thing");
+		//Serial.println(outputValue);
 	}
 	
 
@@ -411,7 +456,6 @@ void sSDisplay::update( void )
 sSDisplayState_t sSDisplay::getState( void )
 {
 	return state;
-
 }
 
 void sSDisplay::setState( sSDisplayState_t inputValue )
@@ -439,6 +483,21 @@ void sSDisplay::setData( String toSet )
 		data[4] = '\0';
 		updateDisplayFlag = 1;
 	}
+
+	
+}
+
+void sSDisplay::peekThrough( String toSet, uint16_t timeFor )
+{
+	for( int i = 0; i < 4; i++ )
+	{	
+		peekThroughData[i] = toSet[i];
+	}
+	peekThroughData[4] = '\0';
+	updateDisplayFlag = 1;
+	peekThroughFlag = 1;
+	peekingFlag = 0;
+	peekThroughTime = timeFor;
 
 	
 }

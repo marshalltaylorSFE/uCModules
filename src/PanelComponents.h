@@ -4,6 +4,7 @@
 #include "timeKeeper.h"
 #include "s7sWrapper.h"
 
+
 //---Switch------------------------------------------------------
 class PanelSwitch
 {
@@ -97,12 +98,14 @@ public:
   void update( void );
   void init( uint8_t, uint8_t, uint8_t );  // pinNum, maxInput, minInpu,
   uint8_t getState( void );
-  uint8_t state;
-  uint8_t pinNumber;
-  uint8_t newData;
-  uint8_t thresholds[9];
+  
+  uint8_t serviceChanged( void );
 protected:
 private:
+  uint8_t state;
+  uint8_t pinNumber;
+  uint8_t thresholds[9];
+	uint8_t changedFlag;
 };
 
 //---Seven Segment Display---------------------------------------
@@ -111,28 +114,35 @@ enum sSDisplayState_t
   SSON = 0,
   SSOFF = 1,
   SSFLASHING = 2,
-  SSLASHINGFAST = 3
+  SSLASHINGFAST = 3,
+  SSPEEKTHROUGH = 4
 };
 
 class sSDisplay : public S7sObject
 {
 public:
-  sSDisplay( void );
-  void update( void );
-  void init( uint8_t );
-  void init( uint8_t, volatile uint8_t * volatile , volatile uint8_t * volatile );
-  sSDisplayState_t getState( void );
-  void setState( sSDisplayState_t );
-  void setData( String );
-  sSDisplayState_t state;
-
+	sSDisplay( void );
+	void update( void );
+	void init( uint8_t );
+	void init( uint8_t, volatile uint8_t * volatile , volatile uint8_t * volatile );
+	sSDisplayState_t getState( void );
+	void setState( sSDisplayState_t );
+	void setData( String );
+	void peekThrough( String, uint16_t ); // 'data' type, time in ms to persist
+	TimeKeeper peekThroughTimeKeeper;
 protected:
 private:
+	uint8_t peekThroughFlag;
+	uint8_t peekingFlag;
+	uint16_t peekThroughTime;
+	sSDisplayState_t state;
 	uint8_t updateDisplayFlag;
 	uint8_t lastFlasherState;
-  char data[5];
-  volatile uint8_t * volatile flasherState;
-  volatile uint8_t * volatile fastFlasherState;
+	char data[5];
+	char peekThroughData[5];
+	volatile uint8_t * volatile flasherState;
+	volatile uint8_t * volatile fastFlasherState;
+	
 
 };
 
