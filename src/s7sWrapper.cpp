@@ -1,3 +1,6 @@
+//Basic class that operates like the sparkfun hookup I2C example
+#include <stdint.h>
+
 #include "Wire.h"
 #include "s7sWrapper.h"
 
@@ -29,15 +32,15 @@ void S7sObject::clear()
   Wire.endTransmission();
 }
 
-// Set the displays brightness. Should receive byte with the value
+// Set the displays brightness. Should receive uint8_t with the value
 //  to set the brightness to
 //  dimmest------------->brightest
 //     0--------127--------255
-void S7sObject::setBrightness(byte value)
+void S7sObject::setBrightness(uint8_t value)
 {
   Wire.beginTransmission(i2cAddress);
-  Wire.write(0x7A);  // Set brightness command byte
-  Wire.write(value);  // brightness data byte
+  Wire.write(0x7A);  // Set brightness command uint8_t
+  Wire.write(value);  // brightness data uint8_t
   Wire.endTransmission();
 }
 
@@ -45,7 +48,7 @@ void S7sObject::setBrightness(byte value)
 //  The six lowest bits in the decimals parameter sets a decimal 
 //  (or colon, or apostrophe) on or off. A 1 indicates on, 0 off.
 //  [MSB] (X)(X)(Apos)(Colon)(Digit 4)(Digit 3)(Digit2)(Digit1)
-void S7sObject::setDecimals(byte decimals)
+void S7sObject::setDecimals(uint8_t decimals)
 {
   Wire.beginTransmission(i2cAddress);
   Wire.write(0x77);
