@@ -175,7 +175,7 @@ void MessagingFlag::setFlag( void )
 	if(flag == 1)
 	{
 		//Flag already set.  What to do!
-		risingEdgeFlag = 1;
+		//risingEdgeFlag = 1;
 	}
 	else
 	{
@@ -188,7 +188,7 @@ void MessagingFlag::clearFlag( void )
 	if(flag == 0)
 	{
 		//Flag already set.  What to do!
-		fallingEdgeFlag = 1;
+		//fallingEdgeFlag = 1;
 	}
 	else
 	{

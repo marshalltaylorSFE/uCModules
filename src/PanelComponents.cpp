@@ -360,6 +360,8 @@ void sSDisplay::init( uint8_t addressInput )
 	setBrightness(255);  // High brightness
 	//sprintf(tempString, "%4d", (unsigned int)8888);
 	SendString("    ");
+	peekThroughFlag = 0;
+	peekingFlag = 0;
 
 }
 
