@@ -3,7 +3,7 @@
 #include <Arduino.h>
 #include "timeKeeper.h"
 #include "s7sWrapper.h"
-
+#include "flagMessaging.h"
 
 //---Switch------------------------------------------------------
 class PanelSwitch
@@ -12,13 +12,46 @@ public:
   PanelSwitch( void );
   void update( void );
   void init( uint8_t );
+  MessagingFlag state;
+  uint8_t invert;
+  uint8_t pinNumber;
+	TimeKeeper SwitchDebounceTimeKeeper;
+protected:
+private:
+};
+
+//---Knob--------------------------------------------------------
+class PanelKnob8Bit
+{
+public:
+  PanelKnob8Bit( void );
+  void update( void );
+  void init( uint8_t );
   uint8_t getState( void );
   uint8_t state;
-  uint8_t invert;
   uint8_t pinNumber;
   uint8_t newData;
 protected:
 private:
+};
+
+//---Register----------------------------------------------------
+class PanelRegister
+{
+public:
+  PanelRegister( void );
+  void update( void );
+  void init( uint8_t, uint8_t, uint8_t );
+  uint8_t getState( void );
+  uint8_t state;
+  uint8_t pinMap[8];
+  uint8_t length;
+  uint8_t newData;
+protected:
+private:
+  PanelSwitch switchBit0;
+  PanelSwitch switchBit1;
+  PanelSwitch switchBit2;
 };
 
 //---Button------------------------------------------------------
@@ -95,8 +128,10 @@ class PanelSelector
 {
 public:
   PanelSelector( void );
+  ~PanelSelector( void );
   void update( void );
-  void init( uint8_t, uint8_t, uint8_t );  // pinNum, maxInput, minInpu,
+  void init( uint8_t, uint8_t, uint8_t );  //calls init(,,,);
+  void init( uint8_t, uint8_t, uint8_t, uint8_t);//pinNum, maxInput, minInput, number of points
   uint8_t getState( void );
   
   uint8_t serviceChanged( void );
@@ -104,8 +139,9 @@ protected:
 private:
   uint8_t state;
   uint8_t pinNumber;
-  uint8_t thresholds[9];
+  uint8_t * thresholds;
 	uint8_t changedFlag;
+	uint8_t points;
 };
 
 //---Seven Segment Display---------------------------------------
