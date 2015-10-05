@@ -1,11 +1,13 @@
+//Basic class that operates like the sparkfun hookup I2C example
+#include <stdint.h>
+
 #include "Wire.h"
 #include "s7sWrapper.h"
-#include "Arduino.h"
 
 //Constructor
-S7sObject::S7sObject( uint8_t inputAddress )
+S7sObject::S7sObject( void )
 {
-	i2cAddress = inputAddress;
+	i2cAddress = 0x71;
 }
 
 // This custom function works somewhat like a serial.print.
@@ -30,15 +32,15 @@ void S7sObject::clear()
   Wire.endTransmission();
 }
 
-// Set the displays brightness. Should receive byte with the value
+// Set the displays brightness. Should receive uint8_t with the value
 //  to set the brightness to
 //  dimmest------------->brightest
 //     0--------127--------255
 void S7sObject::setBrightness(uint8_t value)
 {
   Wire.beginTransmission(i2cAddress);
-  Wire.write(0x7A);  // Set brightness command byte
-  Wire.write(value);  // brightness data byte
+  Wire.write(0x7A);  // Set brightness command uint8_t
+  Wire.write(value);  // brightness data uint8_t
   Wire.endTransmission();
 }
 
