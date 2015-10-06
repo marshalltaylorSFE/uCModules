@@ -19,9 +19,6 @@
 #define PENDING 1
 #define UNSERVICED 2
 
-
-#define MAXTIMER 60000
-
 //Classes
 class TimerClass
 {

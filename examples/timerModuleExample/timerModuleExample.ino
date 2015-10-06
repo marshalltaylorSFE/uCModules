@@ -14,9 +14,18 @@
 //HOW TO OPERATE
 //  Make TimerClass objects for each thing that needs periodic service
 //  pass the interval of the period in ticks
-//  Set MAXINTERVAL to the max foreseen interval of any TimerClass
+//  Set MAXINTERVAL to the max foreseen interval of the loop
+//    Calculate by summing the execution time of all timerClasses used
+//    plus the time of the loop itself.  In other words, if all timers are
+//    called in a particular loop, the msTicks will be incrementing for
+//    extra time before the loop has a chance to update the timerClasses
+//    so let msTicks increment rather than to reset ( or we lose track of
+//    time ).
 //  Set MAXTIMER to overflow number in the header.  MAXTIMER + MAXINTERVAL
 //    cannot exceed variable size.
+#define MAXTIMER 60000
+#define MAXINTERVAL 2000
+
 
 #define LEDPIN 13
 #include "timerModule.h"
@@ -38,8 +47,6 @@ TimerClass msTimerB( 21 );
 
 uint16_t msTicks = 0;
 uint8_t msTicksMutex = 1; //start locked out
-
-#define MAXINTERVAL 2000
 
 void setup()
 {
@@ -128,7 +135,7 @@ void serviceMS(void)
 #endif
 {
   uint32_t returnVar = 0;
-  if(msTicks >= ( MAXTIMER + MAXINTERVAL ))
+  if( msTicks >= ( MAXTIMER + MAXINTERVAL ) )
   {
     returnVar = msTicks - MAXTIMER;
 
