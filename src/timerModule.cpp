@@ -13,7 +13,8 @@
 
 //Includes
 #include "timerModule.h"
-
+extern uint16_t MAXTIMER;
+extern uint16_t MAXINTERVAL;
 //**********************************************************************//
 //
 //  Periodic timer class

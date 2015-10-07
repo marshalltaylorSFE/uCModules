@@ -15,7 +15,7 @@
 #include "timeKeeper.h"
 #include "timerModule.h"
 
-#define MAXTIMER 60000
+#define MAXTIME 60000
 
 //**********************************************************************//
 //
@@ -43,7 +43,7 @@ uint16_t TimeKeeper::mGet( void )
 void TimeKeeper::mIncrement( uint8_t var_Increment )
 {
     //clamp it.
-	if( timeElapsed < MAXTIMER )
+	if( timeElapsed < MAXTIME )
 	{
 		timeElapsed += var_Increment;
 	}

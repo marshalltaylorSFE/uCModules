@@ -15,7 +15,7 @@
 //HOW TO OPERATE
 //  Make TimerClass objects for each thing that needs periodic service
 //  pass the interval of the period in ticks
-//  Set MAXINTERVAL to the max foreseen interval of any TimerClass
+//  Set MAXINTERVAL to the max foreseen interval of combined TimerClasses
 //  Set MAXTIMER to overflow number in the header.  MAXTIMER + MAXINTERVAL
 //    cannot exceed variable size.
 
@@ -23,21 +23,37 @@
 //  The timerModule32 only works on teensy / fast processors.  It works the same
 //  but keeps track of everything in us counts.
 
+
+//Not used by this sketch but dependant on one 
+#include "Wire.h"
+
+//Globals
+uint32_t MAXTIMER = 60000000;
+uint32_t MAXINTERVAL = 2000000;
+
 #define LEDPIN 13
 #include "timerModule32.h"
 #include "stdint.h"
 
-IntervalTimer myTimer;
+IntervalTimer myTimer; //Interrupt for Teensy
 
-//Globals
 TimerClass32 usTimerA( 20000 );
-TimerClass32 usTimerB( 21000 );
+TimerClass32 usTimerB( 25000 );
+TimerClass32 usTimerC( 27300 );
+//Note on TimerClass-
+//Change with usTimerA.setInterval( <the new interval> );
+
 
 uint32_t usTicks = 0;
-uint8_t usTicksMutex = 1; //start locked out
 
-#define MAXINTERVAL 2000000
-
+// The lock works like this:
+//
+//  When the interrupt fires, the lock is removed.  Now
+// the main free-wheeling loop can update the change to
+// the timerModules.  Once complete, the lock is replaced
+// so that it can't update more than once per firing
+// of the interrupt
+uint8_t usTicksLocked = 1; //start locked out
 void setup()
 {
   //Serial.begin(9600);
@@ -48,39 +64,33 @@ void setup()
 
 }
 
-int i = 0;
-int32_t intervalSeed = 20000;
 void loop()
 {
-  // main program
-  
-  if( usTicksMutex == 0 )  //Only touch the timers if clear to do so.
-  {
-    usTimerA.update(usTicks);
-    usTimerB.update(usTicks);
-    //Done?  Lock it back up
-    usTicksMutex = 1;
-  }  //The ISR should clear the mutex.
-  
-  
-  if(usTimerA.flagStatus() == PENDING)
-  {
-    digitalWrite( LEDPIN, digitalRead(LEDPIN) ^ 1 );
-  }
-  if(usTimerB.flagStatus() == PENDING)
-  {
-    digitalWrite( LEDPIN, digitalRead(LEDPIN) ^ 1 );
-  }
-  i++;
-  delay(1);
-  if(i > 100)
-  {
-    i = 0;
-    usTimerA.setInterval(intervalSeed);
-    intervalSeed = intervalSeed + 1000;
-    usTimerB.setInterval(intervalSeed);
+	//Update the timers, but only once per interrupt
+	if( usTicksLocked == 0 )
+	{
+		usTimerA.update(usTicks);
+		usTimerB.update(usTicks);
+		usTimerC.update(usTicks);
+		//Done?  Lock it back up
+		usTicksLocked = 1;
+	}  //The ISR will unlock.
 
-  }
+
+	if(usTimerA.flagStatus() == PENDING)
+	{
+		digitalWrite( LEDPIN, digitalRead( LEDPIN ) ^ 0x01 );
+	}
+	if(usTimerB.flagStatus() == PENDING)
+	{
+		digitalWrite( LEDPIN, digitalRead( LEDPIN ) ^ 0x01 );
+	}
+	if(usTimerC.flagStatus() == PENDING)
+	{
+		digitalWrite( LEDPIN, digitalRead( LEDPIN ) ^ 0x01 );
+	}
+	delay(1);
+
 
 }
 
@@ -97,7 +107,7 @@ void serviceUS(void)
     returnVar = usTicks + 1;
   }
   usTicks = returnVar;
-  usTicksMutex = 0;  //unlock
+  usTicksLocked = 0;  //unlock
 }
 
 

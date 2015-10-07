@@ -14,7 +14,8 @@
 
 //Includes
 #include "timerModule32.h"
-
+extern uint32_t MAXTIMER;
+extern uint32_t MAXINTERVAL;
 //**********************************************************************//
 //
 //  Periodic timer class

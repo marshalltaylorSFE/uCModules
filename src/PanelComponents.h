@@ -1,8 +1,9 @@
+#include "s7sWrapper.h"
 #ifndef PANELCOMPONENTS_H
 #define PANELCOMPONENTS_H
+
 #include <Arduino.h>
 #include "timeKeeper.h"
-#include "s7sWrapper.h"
 #include "flagMessaging.h"
 
 //---Switch------------------------------------------------------

@@ -16,13 +16,6 @@
 
 #include "stdint.h"
 
-// #define WAITING 0
-// #define PENDING 1
-// #define UNSERVICED 2
-
-
-//#define MAXTIMER 60000000
-
 //Classes
 class TimeKeeper32
 {
