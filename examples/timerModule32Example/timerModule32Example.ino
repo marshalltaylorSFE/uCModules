@@ -1,23 +1,10 @@
-//**********************************************************************//
-//  BEERWARE LICENSE
-//
-//  This code is free for any use provided that if you meet the author
-//  in person, you buy them a beer.
-//
-//  This license block is BeerWare itself.
-//
-//  Written by:  Marshall Taylor
-//  Changelog (YYYY/MM/D):
-//    2015/09/07: Created
-//  
-//**********************************************************************//
-
 //HOW TO OPERATE
 //  Make TimerClass objects for each thing that needs periodic service
 //  pass the interval of the period in ticks
-//  Set MAXINTERVAL to the max foreseen interval of combined TimerClasses
-//  Set MAXTIMER to overflow number in the header.  MAXTIMER + MAXINTERVAL
-//    cannot exceed variable size.
+//
+//  Set MAXINTERVAL to rollover rate
+//  Set MAXTIMER to the max foreseen interval of any timer.
+//  MAXTIMER + MAXINTERVAL = max countable value.
 
 //NOTICE:
 //  The timerModule32 only works on teensy / fast processors.  It works the same
@@ -37,7 +24,9 @@ uint32_t MAXINTERVAL = 2000000;
 
 IntervalTimer myTimer; //Interrupt for Teensy
 
-TimerClass32 usTimerA( 20000 );
+//**Copy to make a new timer******************//  
+//TimerClass32 usTimerA( 20000 ); //20 ms
+TimerClass32 usTimerA( 20000 ); //20 ms
 TimerClass32 usTimerB( 25000 );
 TimerClass32 usTimerC( 27300 );
 //Note on TimerClass-
@@ -46,13 +35,14 @@ TimerClass32 usTimerC( 27300 );
 
 uint32_t usTicks = 0;
 
-// The lock works like this:
+//  The lock works like this:
 //
-//  When the interrupt fires, the lock is removed.  Now
-// the main free-wheeling loop can update the change to
-// the timerModules.  Once complete, the lock is replaced
-// so that it can't update more than once per firing
-// of the interrupt
+//    When the interrupt fires, the lock is removed.  Now
+//    the main free-wheeling loop can update the change to
+//    the timerModules.  Once complete, the lock is replaced
+//    so that it can't update more than once per firing
+//    of the interrupt
+
 uint8_t usTicksLocked = 1; //start locked out
 void setup()
 {
@@ -69,6 +59,9 @@ void loop()
 	//Update the timers, but only once per interrupt
 	if( usTicksLocked == 0 )
 	{
+		//**Copy to make a new timer******************//  
+		//msTimerA.update(usTicks);
+		
 		usTimerA.update(usTicks);
 		usTimerB.update(usTicks);
 		usTimerC.update(usTicks);
@@ -76,20 +69,27 @@ void loop()
 		usTicksLocked = 1;
 	}  //The ISR will unlock.
 
-
+	//**Copy to make a new timer******************//  
+	//if(usTimerA.flagStatus() == PENDING)
+	//{
+	//	//User code
+	//}
+	
 	if(usTimerA.flagStatus() == PENDING)
 	{
+		//User code
 		digitalWrite( LEDPIN, digitalRead( LEDPIN ) ^ 0x01 );
 	}
 	if(usTimerB.flagStatus() == PENDING)
 	{
+		//User code
 		digitalWrite( LEDPIN, digitalRead( LEDPIN ) ^ 0x01 );
 	}
 	if(usTimerC.flagStatus() == PENDING)
 	{
+		//User code
 		digitalWrite( LEDPIN, digitalRead( LEDPIN ) ^ 0x01 );
 	}
-	delay(1);
 
 
 }

@@ -1,16 +1,7 @@
-//**********************************************************************//
-//  BEERWARE LICENSE
+//  Example of messaging.  Inner class communicates with outer class,
+//    the button, and the pin.  The outer class loops the info back
+//    to the inner class with 0.5 second delay
 //
-//  This code is free for any use provided that if you meet the author
-//  in person, you buy them a beer.
-//
-//  This license block is BeerWare itself.
-//
-//  Written by:  Marshall Taylor
-//  Created:  September 20, 2015
-//
-//**********************************************************************//
-
 #include "flagMessaging.h"
 #include <stdint.h>
 #include "Wire.h"

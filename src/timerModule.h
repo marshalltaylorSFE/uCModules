@@ -1,13 +1,11 @@
 //**********************************************************************//
-//  BEERWARE LICENSE
 //
-//  This code is free for any use provided that if you meet the author
-//  in person, you buy them a beer.
-//
-//  This license block is BeerWare itself.
+//  MIT License: http://opensource.org/licenses/MIT
 //
 //  Written by:  Marshall Taylor
-//  Created:  March 21, 2015
+//  Changelog (YYYY/MM/DD):
+//    2015/05/21: Created
+//    2015/10/08: Initial Release
 //
 //**********************************************************************//
 #ifndef TIMERMODULE_H_INCLUDED

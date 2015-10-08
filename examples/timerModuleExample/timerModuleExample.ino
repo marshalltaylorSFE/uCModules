@@ -1,28 +1,10 @@
-//**********************************************************************//
-//  BEERWARE LICENSE
-//
-//  This code is free for any use provided that if you meet the author
-//  in person, you buy them a beer.
-//
-//  This license block is BeerWare itself.
-//
-//  Written by:  Marshall Taylor
-//  Created:  March 21, 2015
-//
-//**********************************************************************//
-
 //HOW TO OPERATE
 //  Make TimerClass objects for each thing that needs periodic service
 //  pass the interval of the period in ticks
-//  Set MAXINTERVAL to the max foreseen interval of the loop
-//    Calculate by summing the execution time of all timerClasses used
-//    plus the time of the loop itself.  In other words, if all timers are
-//    called in a particular loop, the msTicks will be incrementing for
-//    extra time before the loop has a chance to update the timerClasses
-//    so let msTicks increment rather than to reset ( or we lose track of
-//    time ).
-//  Set MAXTIMER to overflow number in the header.  MAXTIMER + MAXINTERVAL
-//    cannot exceed variable size.
+//
+//  Set MAXINTERVAL to rollover rate
+//  Set MAXTIMER to the max foreseen interval of any timer.
+//  MAXTIMER + MAXINTERVAL = max countable value.
 
 //Globals
 uint16_t MAXTIMER = 60000;
@@ -46,6 +28,8 @@ IntervalTimer myTimer;
 #endif
 
 //Globals
+//**Copy to make a new timer******************//  
+//TimerClass32 msTimerA( 200 ); //200 ms
 TimerClass msTimerA( 200 ); //milliseconds between calls
 TimerClass msTimerB( 210 );
 TimerClass msTimerC( 220 );
@@ -55,13 +39,14 @@ TimerClass msTimerC( 220 );
 
 uint16_t msTicks = 0;
 
-// The lock works like this:
+//  The lock works like this:
 //
-//  When the interrupt fires, the lock is removed.  Now
-// the main free-wheeling loop can update the change to
-// the timerModules.  Once complete, the lock is replaced
-// so that it can't update more than once per firing
-// of the interrupt
+//    When the interrupt fires, the lock is removed.  Now
+//    the main free-wheeling loop can update the change to
+//    the timerModules.  Once complete, the lock is replaced
+//    so that it can't update more than once per firing
+//    of the interrupt
+
 uint8_t msTicksLocked = 1; //start locked out
 
 void setup()
@@ -108,6 +93,9 @@ void loop()
 	//Update the timers, but only once per interrupt
 	if( msTicksLocked == 0 )
 	{
+		//**Copy to make a new timer******************//  
+		//msTimerA.update(msTicks);
+		
 		msTimerA.update(msTicks);
 		msTimerB.update(msTicks);
 		msTimerC.update(msTicks);
@@ -115,20 +103,27 @@ void loop()
 		msTicksLocked = 1;
 	}  //The ISR will unlock.
 
-
+	//**Copy to make a new timer******************//  
+	//if(msTimerA.flagStatus() == PENDING)
+	//{
+	//	//User code
+	//}
+	
 	if(msTimerA.flagStatus() == PENDING)
 	{
+		//User code
 		digitalWrite( LEDPIN, digitalRead( LEDPIN ) ^ 0x01 );
 	}
 	if(msTimerB.flagStatus() == PENDING)
 	{
+		//User code
 		digitalWrite( LEDPIN, digitalRead( LEDPIN ) ^ 0x01 );
 	}
 	if(msTimerC.flagStatus() == PENDING)
 	{
+		//User code
 		digitalWrite( LEDPIN, digitalRead( LEDPIN ) ^ 0x01 );
 	}
-	delay(1);
 
 
 }

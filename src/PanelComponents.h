@@ -1,3 +1,12 @@
+//**********************************************************************//
+//
+//  MIT License: http://opensource.org/licenses/MIT
+//
+//  Written by:  Marshall Taylor
+//  Changelog (YYYY/MM/DD):
+//    2015/10/08: Beta Release
+//
+//**********************************************************************//
 #include "s7sWrapper.h"
 #ifndef PANELCOMPONENTS_H
 #define PANELCOMPONENTS_H

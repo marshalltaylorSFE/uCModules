@@ -1,4 +1,4 @@
-uCTools
+uCModules
 ========================================
 
 Repository Contents
@@ -13,13 +13,13 @@ Repository Contents
 Documentation
 --------------
 
-Tested on Arduino and Teensy 3.1.  Use examples for demonstration.
+Tested on Uno and Teensy 3.x  Use examples for demonstration.
 
 Version History
 ---------------
 
-* [vExxFxxZxxHxxLxxSxx](URL for tag specific to this version) - Description 
-* [vEyyFyyZyyHyyLyySyy](URL for tag specific to this version) - Description
+* [V1.0](https://github.com/marshalltaylorSFE/uCModules/tree/V_1_0) - Initial release
+
 
 License Information
 -------------------

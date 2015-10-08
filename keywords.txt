@@ -1,0 +1,38 @@
+#############################
+# Syntax Coloring mCModules #
+#############################
+# Class
+###################################################################
+
+TimeKeeper	KEYWORD1
+TimeKeeper32	KEYWORD1
+TimerClass	KEYWORD1
+TimerClass32	KEYWORD1
+MessagingFlag	KEYWORD1
+
+###################################################################
+# Methods and Functions
+###################################################################
+
+mClear	KEYWORD2
+mGet	KEYWORD2
+mIncrement	KEYWORD2
+uClear	KEYWORD2
+uGet	KEYWORD2
+uIncrement	KEYWORD2
+update	KEYWORD2
+flagStatus	KEYWORD2
+setInterval	KEYWORD2
+setFlag	KEYWORD2
+clearFlag	KEYWORD2
+getFlag	KEYWORD2
+serviceRisingEdge	KEYWORD2
+serviceFallingEdge	KEYWORD2
+
+###################################################################
+# Constants
+###################################################################
+
+WAITING	LITERAL1
+PENDING	LITERAL1
+UNSERVICED	LITERAL1
