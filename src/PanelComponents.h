@@ -5,6 +5,7 @@
 //  Written by:  Marshall Taylor
 //  Changelog (YYYY/MM/DD):
 //    2015/10/08: Beta Release
+//    2016/05/08: Fixed button falling edge detection and added LED invertion
 //
 //**********************************************************************//
 #include "s7sWrapper.h"
@@ -125,12 +126,13 @@ public:
   uint8_t pinNumber;
   uint8_t cache;
   void setBank( uint8_t );
+  void outputInvert( uint8_t );
 protected:
 private:
   uint8_t bank;
   volatile uint8_t * volatile flasherState;
   volatile uint8_t * volatile fastFlasherState;
-
+  uint8_t invert;
 };
 
 //---Selector----------------------------------------------------

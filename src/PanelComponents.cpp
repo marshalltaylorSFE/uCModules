@@ -5,6 +5,7 @@
 //  Written by:  Marshall Taylor
 //  Changelog (YYYY/MM/DD):
 //    2015/10/08: Beta Release
+//    2016/05/08: Fixed button falling edge detection and added LED invertion
 //
 //**********************************************************************//
 #include "PanelComponents.h"
@@ -207,6 +208,7 @@ void PanelButton::update( void )
 		{
 			buttonDebounceTimeKeeper.mClear();
 			nextState = BUTTONOFF;
+			fallingEdgeFlag = 1;
 		}
 		break;
 	default:
@@ -281,6 +283,7 @@ PanelLed::PanelLed( void )
 {
 	state = LEDOFF;
 	bank = 0;
+	invert = 0;
 }
 
 void PanelLed::init( uint8_t pinInput )
@@ -338,7 +341,7 @@ void PanelLed::update( void )
 	//Serial.print(*flasherState);
 	if( bank == 0 )
 	{
-		digitalWrite( pinNumber, outputValue );
+		digitalWrite( pinNumber, ( outputValue ^ invert ) );
 		//Serial.print("B:");
 		//Serial.print(*flasherState);
 	}
@@ -368,6 +371,13 @@ void PanelLed::setBank( uint8_t inputBank )
 {
 	bank = inputBank;
 
+}
+
+
+void PanelLed::outputInvert( uint8_t invertVar )
+{
+	invert = invertVar;
+	
 }
 
 //---Selector----------------------------------------------------
