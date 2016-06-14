@@ -12,8 +12,10 @@
 
 //Includes
 #include "timerModule32.h"
-extern uint32_t MAXTIMER;
-extern uint32_t MAXINTERVAL;
+
+extern uint32_t maxTimer;
+extern uint32_t maxInterval;
+
 //**********************************************************************//
 //
 //  Periodic timer class
@@ -32,7 +34,7 @@ void TimerClass32::update( uint32_t usTicksInput )
     if( usTicksInput < lastService )  //overflow has occurred
     {
         //Adjust as if nothing ever happened
-        lastService = lastService - MAXTIMER;
+        lastService = lastService - maxTimer;
     }
 
     //Now process knowing an overflow has been dealt with if present

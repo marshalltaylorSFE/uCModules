@@ -26,9 +26,10 @@ IntervalTimer myTimer; //Interrupt for Teensy
 
 //**Copy to make a new timer******************//  
 //TimerClass32 usTimerA( 20000 ); //20 ms
-TimerClass32 usTimerA( 1000000 );
-TimerClass32 usTimerB( 500000 );
-TimerClass32 usTimerC( 333333 );
+
+//**Current list of timers********************//
+TimerClass32 debugTimer( 1000000 ); //1 second
+
 //Note on TimerClass-
 //Change with usTimerA.setInterval( <the new interval> );
 
@@ -61,10 +62,8 @@ void loop()
 	{
 		//**Copy to make a new timer******************//  
 		//msTimerA.update(usTicks);
-		
-		usTimerA.update(usTicks);
-		usTimerB.update(usTicks);
-		usTimerC.update(usTicks);
+		debugTimer.update(usTicks);
+
 		//Done?  Lock it back up
 		usTicksLocked = 1;
 	}  //The ISR will unlock.
@@ -75,22 +74,11 @@ void loop()
 	//	//User code
 	//}
 	
-	if(usTimerA.flagStatus() == PENDING)
+	if(debugTimer.flagStatus() == PENDING)
 	{
 		//User code
 		digitalWrite( LEDPIN, digitalRead( LEDPIN ) ^ 0x01 );
 	}
-	if(usTimerB.flagStatus() == PENDING)
-	{
-		//User code
-		digitalWrite( LEDPIN, digitalRead( LEDPIN ) ^ 0x01 );
-	}
-	if(usTimerC.flagStatus() == PENDING)
-	{
-		//User code
-		digitalWrite( LEDPIN, digitalRead( LEDPIN ) ^ 0x01 );
-	}
-
 
 }
 

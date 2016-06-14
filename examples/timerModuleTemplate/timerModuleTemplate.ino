@@ -30,9 +30,8 @@ IntervalTimer myTimer;
 //Globals
 //**Copy to make a new timer******************//  
 //TimerClass32 msTimerA( 200 ); //200 ms
-TimerClass msTimerA( 1000 ); //milliseconds between calls
-TimerClass msTimerB( 500 );
-TimerClass msTimerC( 333 );
+TimerClass debugTimer( 1000 ); //milliseconds between calls
+
 //Note on TimerClass-
 //Change with msTimerA.setInterval( <the new interval> );
 
@@ -95,10 +94,8 @@ void loop()
 	{
 		//**Copy to make a new timer******************//  
 		//msTimerA.update(msTicks);
-		
-		msTimerA.update(msTicks);
-		msTimerB.update(msTicks);
-		msTimerC.update(msTicks);
+		debugTimer.update(msTicks);
+
 		//Done?  Lock it back up
 		msTicksLocked = 1;
 	}  //The ISR will unlock.
@@ -109,22 +106,11 @@ void loop()
 	//	//User code
 	//}
 	
-	if(msTimerA.flagStatus() == PENDING)
+	if(debugTimer.flagStatus() == PENDING)
 	{
 		//User code
 		digitalWrite( LEDPIN, digitalRead( LEDPIN ) ^ 0x01 );
 	}
-	if(msTimerB.flagStatus() == PENDING)
-	{
-		//User code
-		digitalWrite( LEDPIN, digitalRead( LEDPIN ) ^ 0x01 );
-	}
-	if(msTimerC.flagStatus() == PENDING)
-	{
-		//User code
-		digitalWrite( LEDPIN, digitalRead( LEDPIN ) ^ 0x01 );
-	}
-
 
 }
 
