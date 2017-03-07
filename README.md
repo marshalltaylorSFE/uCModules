@@ -27,8 +27,8 @@ Tested on Uno and Teensy 3.x  Use examples for demonstration.
 Version History
 ---------------
 
-* [V1.0](https://github.com/marshalltaylorSFE/uCModules/tree/V_1_0) - Initial release
-
+* [v1.0](https://github.com/marshalltaylorSFE/uCModules/tree/V_1_0) - Initial release
+* [v1.0.1](https://github.com/marshalltaylorSFE/uCModules/tree/V_1_0_1) - Converted #defines to constants
 
 License Information
 -------------------
