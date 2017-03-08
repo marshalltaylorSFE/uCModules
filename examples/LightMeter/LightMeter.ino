@@ -8,7 +8,7 @@ void setup()
 
 void loop()
 {
-	delay(1000);
+	delay(10);
 	myLuxPanel.tickStateMachine(10);
-	Serial.println("End of loop");
+	//Serial.println("End of loop");
 }

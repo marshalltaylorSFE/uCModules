@@ -11,7 +11,7 @@ public:
 	LuxPanel( void );
 	void tickStateMachine( int msTicksDelta );
 
-private:	
+private:
 	Button upButton;
 	Button downButton;
 	Button encButton;

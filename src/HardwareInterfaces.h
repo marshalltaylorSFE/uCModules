@@ -56,15 +56,8 @@ public:
 class ArduinoDigitalIn : public GenericHardwareDescription
 {
 public:
-	ArduinoDigitalIn( int inputPin ){
-		pinMode(inputPin, INPUT_PULLUP);
-		localData.size = 1;
-		localData.data = new uint8_t[localData.size];
-		pin = inputPin;
-	};
-	void readHardware( void ){
-		*localData.data = digitalRead( pin );
-	};
+	ArduinoDigitalIn( int inputPin );
+	void readHardware( void );
 protected:
 	int pin;
 };
