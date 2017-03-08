@@ -8,13 +8,23 @@
 class PanelComponent
 {
 public:
-	PanelComponent( void ){};
+	PanelComponent( void ){
+	};
 	virtual bool hasFreshData( void ){
 		return 0;
 	}
 	virtual void freshen( uint16_t msTickDelta );
 protected:
 	GenericHardwareDescription * hardwareInterface;
+public:	
+	static void freshenStatic( uint16_t msTickDelta );
+protected:
+	static uint8_t flasherCounter;
+	static uint8_t fastFlasherCounter;
+	static uint8_t flasherCounterMax;
+	static uint8_t fastFlasherCounterMax;
+	static uint8_t flasherState;
+	static uint8_t fastFlasherState;
 };
 
 //---Button------------------------------------------------------
@@ -46,5 +56,31 @@ private:
 	uint8_t fallingEdgeFlag;
 	uint8_t holdRisingEdgeFlag;
 	uint8_t holdFallingEdgeFlag;
+};
+
+//---Led---------------------------------------------------------
+enum ledState_t
+{
+	LEDON = 0,
+	LEDOFF = 1,
+	LEDFLASHING = 2,
+	LEDFLASHINGFAST = 3
+};
+
+class Led : public PanelComponent
+{
+public:
+	Led( void ) : state(LEDOFF){};
+	void setHardware( GenericHardwareDescription * input, uint8_t invertInput );
+	void freshen( uint16_t msTickDelta );
+	
+	ledState_t getState( void );
+	void setState( ledState_t );
+	void toggle( void );
+	
+private:
+	uint8_t invert;
+	ledState_t state;
+
 };
 #endif

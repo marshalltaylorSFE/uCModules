@@ -3,6 +3,28 @@
 #include "HardwareInterfaces.h"
 #include "Arduino.h"
 
+uint8_t PanelComponent::flasherCounter = 0;
+uint8_t PanelComponent::fastFlasherCounter = 0;
+uint8_t PanelComponent::flasherCounterMax = 333;
+uint8_t PanelComponent::fastFlasherCounterMax = 100;
+uint8_t PanelComponent::flasherState = 1;
+uint8_t PanelComponent::fastFlasherState = 1;
+
+void PanelComponent::freshenStatic( uint16_t msTickDelta ){
+	flasherCounter += msTickDelta;
+	if( flasherCounter > flasherCounterMax )
+	{
+		flasherCounter -= flasherCounterMax;
+		flasherState ^= 0x01;
+	}
+	fastFlasherCounter += msTickDelta;
+	if( fastFlasherCounter > fastFlasherCounterMax )
+	{
+		fastFlasherCounter -= fastFlasherCounterMax;
+		fastFlasherState ^= 0x01;
+	}
+};
+
 //---Button------------------------------------------------------
 void Button::setHardware( GenericHardwareDescription * input, uint8_t invertInput )
 {
@@ -133,4 +155,71 @@ uint8_t Button::serviceHoldFallingEdge( void )
 	}
 	
 	return returnVar;
+}
+
+//---Led---------------------------------------------------------
+void Led::setHardware( GenericHardwareDescription * input, uint8_t invertInput )
+{
+	//flasherState = flasherAddress;
+	//fastFlasherState = fastFlasherAddress;
+	//flasherState = 1;
+	//fastFlasherState = 1;
+	hardwareInterface = input;
+	invert = invertInput;
+}
+
+void Led::freshen( uint16_t msTickDelta )
+{
+	uint8_t outputValue = 0;
+	switch(state)
+	{
+	case LEDON:
+		outputValue = 1;
+		break;
+	case LEDFLASHING:
+		outputValue = flasherState;
+		break;
+	case LEDFLASHINGFAST:
+		outputValue = fastFlasherState;
+		break;
+	default:
+	case LEDOFF:
+		outputValue = 0;
+		break;
+	}
+	
+	//Give the output
+	LedDataObject outputData;
+	*outputData.data = outputValue ^ invert;
+	hardwareInterface->setData(&outputData);
+	//Cause the interface to send the data
+	hardwareInterface->writeHardware();
+	
+}
+
+ledState_t Led::getState( void )
+{
+	return state;
+
+}
+
+void Led::setState( ledState_t inputValue )
+{
+	state = inputValue;
+
+}
+
+void Led::toggle( void )
+{
+	switch(state)
+	{
+	case LEDON:
+		state = LEDOFF;
+		break;
+	case LEDOFF:
+		state = LEDON;
+		break;
+	default:
+		break;
+	}
 }

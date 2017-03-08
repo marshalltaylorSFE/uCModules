@@ -9,8 +9,12 @@ Panel::Panel( void )
 
 void Panel::freshenComponents( uint16_t msTicksDelta )
 {
-	//call all contained objects' freshen
 	ListObject * tempObject = componentList;
+	if( tempObject == NULL ) return;
+	//Call the static update of PanelComponent
+	//tempObject->PanelComponent->freshenStatic( msTicksDelta );
+	PanelComponent::freshenStatic( msTicksDelta );
+	//call all contained objects' freshen
 	while( tempObject != NULL )
 	{
 		tempObject->component->freshen( msTicksDelta );

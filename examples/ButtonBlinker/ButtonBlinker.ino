@@ -1,8 +1,10 @@
 #include "Arduino.h"
 #include "timerModule32.h"
+#include "BlinkerPanel.h"
+
 //Globals
-uint32_t MAXTIMER = 60000000;
-uint32_t MAXINTERVAL = 2000000;
+uint32_t maxTimer = 60000000;
+uint32_t maxInterval = 2000000;
 
 uint8_t ledToggleState = 0;
 uint8_t ledToggleFastState = 0;
@@ -13,15 +15,10 @@ uint8_t ledToggleFastState = 0;
 //Note on TimerClass-
 //Change with usTimerA.setInterval( <the new interval> );
 TimerClass32 panelUpdateTimer(10000);
-TimerClass32 debounceTimer(5000);
-TimerClass32 ledToggleTimer( 333000 );
-TimerClass32 ledToggleFastTimer( 100000 );
-
-TimerClass32 debugTimer(5000000);
+TimerClass32 debugTimer(1000000);
 
 //**Panel State Machine***********************//
-#include "SystemPanel.h"
-SystemPanel mySimplePanel;
+BlinkerPanel mySimplePanel;
 
 uint32_t usTicks = 0;
 
@@ -66,16 +63,9 @@ void setup()
 
 	Serial.begin(115200);
 
-  	//Init panel.h stuff
-	mySimplePanel.init();
-	
-	
 	//Go to fresh state
 	mySimplePanel.reset();
 	
-	//Update the panel
-	mySimplePanel.update();
-  
 }
 
 void loop()
@@ -86,17 +76,11 @@ void loop()
 		//**Copy to make a new timer******************//  
 		//msTimerA.update(usTicks);
 
-		//Panel timers
-		ledToggleTimer.update(usTicks);
-		ledToggleFastTimer.update(usTicks);
 		panelUpdateTimer.update(usTicks);
-		debounceTimer.update(usTicks);
-
 		debugTimer.update(usTicks);
-		
-		//Done?  Lock it back up
+
 		usTicksLocked = 1;
-	}  //The ISR will unlock.
+	}
 
 	//**Copy to make a new timer******************//  
 	//if(usTimerA.flagStatus() == PENDING)
@@ -104,36 +88,15 @@ void loop()
 	//	//User code
 	//}
 	
-	//**Debounce timer****************************//  
-	if(debounceTimer.flagStatus() == PENDING)
-	{
-		mySimplePanel.timersMIncrement(5);
-	
-	}
-		
-	//**Process the panel and state machine***********//  
 	if(panelUpdateTimer.flagStatus() == PENDING)
 	{
 		//Provide inputs
 
 		//Tick the machine
-		mySimplePanel.processMachine();
+		mySimplePanel.tickStateMachine(10);
 		
 		//Deal with outputs 
 		//  Form: if( myFlagName.resetTapHeadFlag.serviceRisingEdge() )...
-		
-	}
-	//**Fast LED toggling of the panel class***********//  
-	if(ledToggleFastTimer.flagStatus() == PENDING)
-	{
-		//mySimplePanel.toggleFastFlasherState();
-		
-	}
-
-	//**LED toggling of the panel class***********//  
-	if(ledToggleTimer.flagStatus() == PENDING)
-	{
-		//mySimplePanel.toggleFlasherState();
 		
 	}
 	//**Debug timer*******************************//  
@@ -141,8 +104,10 @@ void loop()
 	{
 		//uint32_t tempRef = analogRead(REFPIN);
 		Serial.println("**************************Debug Service**************************");
-		//Serial.print("Current state: ");
-		//Serial.println(mySimplePanel.getState());
+		Serial.print("Current state: ");
+		Serial.println(mySimplePanel.getState());
+		Serial.print("Free ram: ");
+		Serial.println(freeRam()); 
 	
 	
 	}
@@ -160,9 +125,9 @@ void serviceMS(void)
 #endif
 {
 	uint32_t returnVar = 0;
-	if( usTicks >= ( MAXTIMER + MAXINTERVAL ) )
+	if( usTicks >= ( maxTimer + maxInterval ) )
 	{
-		returnVar = usTicks - MAXTIMER;
+		returnVar = usTicks - maxTimer;
 
 	}
 	else
@@ -173,3 +138,8 @@ void serviceMS(void)
 	usTicksLocked = 0;  //unlock
 }
 
+int freeRam () {
+  extern int __heap_start, *__brkval;
+  int v;
+  return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
+}

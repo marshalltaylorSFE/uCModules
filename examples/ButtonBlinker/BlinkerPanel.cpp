@@ -1,19 +1,22 @@
-//**SystemPanel*******************************//
-#include "SystemPanel.h"
+//********************************************//
+#include "BlinkerPanel.h"
 #include "panelComponents.h"
 #include "HardwareInterfaces.h"
 #include <Arduino.h>
 
-SystemPanel::SystemPanel( void )
+BlinkerPanel::BlinkerPanel( void )
 {
-	upButton.setHardware(new ArduinoDigitalIn( 22 ), 1);
+	myButton.setHardware(new ArduinoDigitalIn( 3 ), 1);
 	add( &myButton );
+
+	myLed.setHardware(new ArduinoDigitalOut( 2 ), 0);
+	add( &myLed );
 	
 	state = PInit;
 	held = 0;
 }
 
-void SystemPanel::reset( void )
+void BlinkerPanel::reset( void )
 {
 	//Set explicit states
 	//Set all LED off
@@ -23,7 +26,7 @@ void SystemPanel::reset( void )
 	
 }
 
-void SystemPanel::tickStateMachine( int msTicksDelta )
+void BlinkerPanel::tickStateMachine( int msTicksDelta )
 {
 	freshenComponents( msTicksDelta );
 	

@@ -32,6 +32,19 @@ public:
 	}
 };	
 
+class LedDataObject : public DataObject
+{
+public:
+	LedDataObject( void ){
+		size = 1;
+		data = new uint8_t[size];
+	};
+	~LedDataObject( void ){
+		delete[] data;
+	}
+};	
+
+
 //The abstract class GenericHardwareDescription must be inheireted
 // by the interface to whatever external driver is being used.  Data must be present
 // or get-able by the readHardware and writeHardware definitions.
@@ -46,6 +59,12 @@ public:
 			memcpy( inputObject, &localData, sizeof(localData) );
 		}
 	};
+	void setData( DataObject * inputObject ){
+		if( sizeof(*inputObject) == sizeof(localData) )
+		{
+			memcpy( &localData, inputObject, sizeof(inputObject) );
+		}
+	};
 //protected:
 	GenericHardwareDescription( void ){};
 	//Data vended upstream
@@ -58,6 +77,16 @@ class ArduinoDigitalIn : public GenericHardwareDescription
 public:
 	ArduinoDigitalIn( int inputPin );
 	void readHardware( void );
+protected:
+	int pin;
+};
+
+//Arduino digital out
+class ArduinoDigitalOut : public GenericHardwareDescription
+{
+public:
+	ArduinoDigitalOut( int inputPin );
+	void writeHardware( void );
 protected:
 	int pin;
 };

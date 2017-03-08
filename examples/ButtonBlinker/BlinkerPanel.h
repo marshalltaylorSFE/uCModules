@@ -2,8 +2,8 @@
 #ifndef SYSTEMPANEL_H_INCLUDED
 #define SYSTEMPANEL_H_INCLUDED
 
-#include "LuxPanel.h"
-#include "panelComponents.h"
+#include "Panel.h"
+#include "PanelComponents.h"
 #include "HardwareInterfaces.h"
 #include <Arduino.h>
 
@@ -15,12 +15,15 @@ enum PStates
 	PFastFlash
 };
 
-class SystemPanel : public Panel
+class BlinkerPanel : public Panel
 {
 public:
-	SystemPanel( void );
+	BlinkerPanel( void );
 	void reset( void );
 	void tickStateMachine( int msTicksDelta );
+	uint8_t getState( void ){
+		return (uint8_t)state;
+	}
 	
 private:
 	//Internal Panel Components

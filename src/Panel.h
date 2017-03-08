@@ -40,6 +40,7 @@ class Panel
 public:
 	Panel();
 	void add( PanelComponent * inputComp );
+protected:
 	void freshenComponents( uint16_t msTicksDelta );
 private:
 	//This is a simple linked list for the panel components.
