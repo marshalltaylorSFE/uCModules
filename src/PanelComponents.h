@@ -83,4 +83,24 @@ private:
 	ledState_t state;
 
 };
+
+//---Knob--------------------------------------------------------
+class Simple10BitKnob : public PanelComponent
+{
+public:
+	Simple10BitKnob( void );
+	void setHardware( GenericHardwareDescription * input );
+	bool hasFreshData( void );
+	void freshen( uint16_t msTickDelta );
+	uint16_t getState( void );
+	uint8_t serviceChanged( void );
+private:
+	uint16_t state;
+	uint16_t lastState;
+	const uint8_t hysteresis = 2;
+	int8_t lastSlope = 1;
+	uint8_t newData;
+
+};
+
 #endif

@@ -42,8 +42,19 @@ public:
 	~LedDataObject( void ){
 		delete[] data;
 	}
-};	
+};
 
+class KnobDataObject : public DataObject
+{
+public:
+	KnobDataObject( void ){
+		size = 2;
+		data = new uint8_t[size];
+	};
+	~KnobDataObject( void ){
+		delete[] data;
+	}
+};
 
 //The abstract class GenericHardwareDescription must be inheireted
 // by the interface to whatever external driver is being used.  Data must be present
@@ -87,6 +98,15 @@ class ArduinoDigitalOut : public GenericHardwareDescription
 public:
 	ArduinoDigitalOut( int inputPin );
 	void writeHardware( void );
+protected:
+	int pin;
+};
+
+class ArduinoAnalogIn : public GenericHardwareDescription
+{
+public:
+	ArduinoAnalogIn( int inputPin );
+	void readHardware( void );
 protected:
 	int pin;
 };

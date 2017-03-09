@@ -223,3 +223,81 @@ void Led::toggle( void )
 		break;
 	}
 }
+
+
+//---Knob--------------------------------------------------------
+Simple10BitKnob::Simple10BitKnob( void )
+{
+	newData = 0;
+	lastState = 0;
+}
+
+void Simple10BitKnob::setHardware( GenericHardwareDescription * input )
+{
+	hardwareInterface = input;
+}
+
+bool Simple10BitKnob::hasFreshData( void )
+{
+	uint8_t returnVar = 0;
+	if( newData )
+	{
+		returnVar = 1;
+	}
+	return returnVar;
+}
+
+void Simple10BitKnob::freshen( uint16_t msTickDelta )
+{
+	//Throw away input
+
+	//Cause the interface to get the data
+	hardwareInterface->readHardware();
+	
+	//Collect the data
+	KnobDataObject tempObject;
+	hardwareInterface->getData(&tempObject);
+	
+	uint16_t tempState = *(uint16_t *)tempObject.data;
+	int8_t tempSlope = 0;
+	state = tempState;
+	int8_t histDirTemp = 0;
+	if( state > lastState )
+	{
+		tempSlope = 1;
+		if( lastSlope == 1 ) histDirTemp = 1;
+	}
+	else if( state < lastState )
+	{
+		tempSlope = -1;
+		if( lastSlope == -1 ) histDirTemp = -1;
+	}
+	if( tempSlope != 0 )
+	{
+		if( state > lastState + hysteresis || histDirTemp == 1)
+		{
+			newData = 1;
+			lastState = state;
+			lastSlope = tempSlope;
+		}
+		if( state < lastState - hysteresis || histDirTemp == -1 )
+		{
+			newData = 1;
+			lastState = state;
+			lastSlope = tempSlope;
+		}
+
+	}
+}
+
+uint16_t Simple10BitKnob::getState( void )
+{
+  newData = 0;
+
+  return state;
+}
+
+uint8_t Simple10BitKnob::serviceChanged( void )
+{
+	return newData;
+}

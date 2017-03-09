@@ -16,7 +16,7 @@ void ArduinoDigitalIn::readHardware( void )
 	*localData.data = digitalRead( pin );
 };
 
-//Arduino out
+//Arduino Digital out
 ArduinoDigitalOut::ArduinoDigitalOut( int inputPin )
 {
 	pinMode(inputPin, OUTPUT);
@@ -29,4 +29,19 @@ ArduinoDigitalOut::ArduinoDigitalOut( int inputPin )
 void ArduinoDigitalOut::writeHardware( void )
 {
 	digitalWrite( pin, *localData.data );
+};
+
+//Arduino Analog in
+ArduinoAnalogIn::ArduinoAnalogIn( int inputPin )
+{
+	pinMode(inputPin, INPUT);
+	localData.size = 2;
+	localData.data = new uint8_t[localData.size];
+	pin = inputPin;
+
+}
+
+void ArduinoAnalogIn::readHardware( void )
+{
+	*(uint16_t *)localData.data = analogRead( pin );
 };
