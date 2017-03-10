@@ -13,12 +13,17 @@ Repository Contents
 Examples
 -------------------
 
-* **ButtonBlinker** - Demonstration of 1 button and 1 led, with state machine. (Panel class)
-* **flagMessagingNested** - Shows how to use the flagMessaging to communicate between classes.  Grounding pin 7 flags an inner class with a MessagingFlag object, which then changes state and communicates back to the outer class through another MessagingFlag object.
-* **timerModule32Example** - Example XORing 3 timers on the LED pin using uS counts with 32 bit counters
-* **timerModule32Template** - Same as example sketch with only a single timer, debugTimer, at 1 second
-* **timerModuleExample** - Example XORing 3 timers on the LED pin using mS counts with 16 bit counters
-* **timerModuleTemplate** - Same as example sketch with only a single timer, debugTimer, at 1 second
+* Panel Components:
+  * **ButtonBlinker** - Demonstration of 1 button and 1 led, with state machine. (Panel class)
+  * **Knobs** - Demonstration of 1 knob
+* Utilities:
+  * **flagMessagingNested** - Shows how to use the flagMessaging to communicate between classes.  Grounding pin 7 flags an inner class with a MessagingFlag object, which then changes state and communicates back to the outer class through another MessagingFlag object.
+  * **timerModule32Example** - Example XORing 3 timers on the LED pin using uS counts with 32 bit counters
+  * **timerModule32Template** - Same as example sketch with only a single timer, debugTimer, at 1 second
+  * **timerModuleExample** - Example XORing 3 timers on the LED pin using mS counts with 16 bit counters
+  * **timerModuleTemplate** - Same as example sketch with only a single timer, debugTimer, at 1 second
+* Full systems:
+  * **LightMeter** - Extends PanelComponents and HardwareInterfaces, includes TeensyView, Encoder, and TSL2561.
 
 Documentation
 --------------

@@ -73,7 +73,7 @@ public:
 	void setData( DataObject * inputObject ){
 		if( sizeof(*inputObject) == sizeof(localData) )
 		{
-			memcpy( &localData, inputObject, sizeof(inputObject) );
+			memcpy( &localData, inputObject, sizeof(*inputObject) );
 		}
 	};
 //protected:
