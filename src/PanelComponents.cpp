@@ -3,10 +3,10 @@
 #include "HardwareInterfaces.h"
 #include "Arduino.h"
 
-uint8_t PanelComponent::flasherCounter = 0;
-uint8_t PanelComponent::fastFlasherCounter = 0;
-uint8_t PanelComponent::flasherCounterMax = 333;
-uint8_t PanelComponent::fastFlasherCounterMax = 100;
+uint16_t PanelComponent::flasherCounter = 0;
+uint16_t PanelComponent::fastFlasherCounter = 0;
+uint16_t PanelComponent::flasherCounterMax = 333;
+uint16_t PanelComponent::fastFlasherCounterMax = 100;
 uint8_t PanelComponent::flasherState = 1;
 uint8_t PanelComponent::fastFlasherState = 1;
 

@@ -19,10 +19,10 @@ protected:
 public:	
 	static void freshenStatic( uint16_t msTickDelta );
 protected:
-	static uint8_t flasherCounter;
-	static uint8_t fastFlasherCounter;
-	static uint8_t flasherCounterMax;
-	static uint8_t fastFlasherCounterMax;
+	static uint16_t flasherCounter;
+	static uint16_t fastFlasherCounter;
+	static uint16_t flasherCounterMax;
+	static uint16_t fastFlasherCounterMax;
 	static uint8_t flasherState;
 	static uint8_t fastFlasherState;
 };

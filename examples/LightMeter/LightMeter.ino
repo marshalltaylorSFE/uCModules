@@ -1,5 +1,4 @@
 #include "LuxPanel.h"
-#include "TeensyView.h"
 #include <SparkFunTSL2561.h>
 
 //////////////////////////////////
@@ -11,7 +10,7 @@
 #define PIN_SCK   14 // Connect SCK to pin 14
 #define PIN_MOSI  7  // Connect MOSI to pin 7
 
-TeensyView oled(PIN_RESET, PIN_DC, PIN_CS, PIN_SCK, PIN_MOSI);
+OLEDFunctions oled(PIN_RESET, PIN_DC, PIN_CS, PIN_SCK, PIN_MOSI);
 
 // Create an SFE_TSL2561 object, here called "light":
 SFE_TSL2561 light;
@@ -28,7 +27,7 @@ void setup()
 	oled.begin();    // Initialize the OLED
 	oled.clear(ALL); // Clear the display's internal memory
 	oled.display();  // Display what's in the buffer (splashscreen)
-	delay(600);     // Delay 1000 ms
+	delay(1200);     // Delay 1000 ms
 	oled.clear(PAGE); // Clear the buffer.
 
 	light.begin();
