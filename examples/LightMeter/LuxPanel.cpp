@@ -17,7 +17,7 @@ extern unsigned int ms;  // Integration ("shutter") time in milliseconds
 const float fStopTable[24] = {1.4, 1.8, 2.0, 2.2, 2.5, 2.8, 3.2, 3.5, 4, 4.5, 5, 5.6, 6.3, 7.1, 8, 9, 10, 11, 13, 14, 16, 18, 20, 22};
 const float exposureTable[12] = {2, 4, 8, 15, 30, 60, 125, 250, 500, 1000, 2000, 4000};
 const float isoTable[7] = {100, 200, 400, 800, 1600, 3200, 6400};
-
+uint8_t isoTableSize = 7;
 
 LuxPanel::LuxPanel( void )
 {
@@ -62,11 +62,7 @@ void LuxPanel::tickStateMachine( int msTicksDelta )
 		drawDisplay = true;
 		oled.clear(PAGE);
 		//menu part
-		oled.drawSeperator1();
-		oled.drawRightArrow();
-		oled.setCursor(10,0);
-		oled.print("Lux");
-
+		oled.drawMenu("Lux", false, true );
 		nextState = PDisplayLuxValue;
 		break;
 	case PDisplayLuxValue:
@@ -109,14 +105,7 @@ void LuxPanel::tickStateMachine( int msTicksDelta )
 	case PDisplayPhotoValueInit:
 		drawDisplay = true;
 		oled.clear(PAGE);
-		//oled.eraseMenu();
-		//oled.eraseArrows();
-		//menu part
-		oled.drawSeperator1();
-		oled.drawRightArrow();
-		oled.drawLeftArrow();
-		oled.setCursor(10,0);
-		oled.print("Photo");
+		oled.drawMenu("Photo", isoTable[isoSetting], true, true );
 
 		oled.drawBrackets();
 		nextState = PDisplayPhotoValue;
@@ -157,11 +146,7 @@ void LuxPanel::tickStateMachine( int msTicksDelta )
 		drawDisplay = true;
 		oled.clear(PAGE);
 		//menu part
-		oled.drawSeperator1();
-		oled.drawRightArrow();
-		oled.drawLeftArrow();
-		oled.setCursor(10,0);
-		oled.print("F-Stop");
+		oled.drawMenu("FStop", isoTable[isoSetting], true, true );
 
 		//Draw last value
 		oled.setCursor(0,11);
@@ -213,15 +198,11 @@ void LuxPanel::tickStateMachine( int msTicksDelta )
 		drawDisplay = true;
 		oled.clear(PAGE);
 		//menu part
-		oled.drawSeperator1();
-		oled.drawRightArrow();
-		oled.drawLeftArrow();
-		oled.setCursor(10,0);
-		oled.print("ISO");
+		oled.drawMenu("ISO", true, true );
 
 		//Draw last value
-		oled.setCursor(0,11);
-		oled.print(isoTable[isoSetting], 2);
+		oled.drawISOScale( isoSetting );
+		
 		nextState = PSetISO;
 		break;
 	case PSetISO:
@@ -238,7 +219,7 @@ void LuxPanel::tickStateMachine( int msTicksDelta )
 				{
 					isoSetting++;
 				}
-				dataWheel.removeDiff(7);
+				dataWheel.removeDiff(8);
 				
 			}
 			if( dataWheel.getDiff() < 0 )
@@ -247,13 +228,11 @@ void LuxPanel::tickStateMachine( int msTicksDelta )
 				{
 					isoSetting--;
 				}
-				dataWheel.removeDiff(7);
+				dataWheel.removeDiff(8);
 				
 			}
 			//Draw new value
-			oled.setCursor(0,11);
-			oled.print(isoTable[isoSetting], 2);
-        
+			oled.drawISOScale( isoSetting );
 		}
 		if( downButton.serviceRisingEdge() )
 		{
@@ -269,10 +248,7 @@ void LuxPanel::tickStateMachine( int msTicksDelta )
 		drawDisplay = true;
 		oled.clear(PAGE);
 		//menu part
-		oled.drawSeperator1();
-		oled.drawLeftArrow();
-		oled.setCursor(10,0);
-		oled.print("Exp.");
+		oled.drawMenu("Exp", isoTable[isoSetting], true, false );
 		
 		//Draw last value
 		oled.setCursor(0,11);
@@ -294,7 +270,7 @@ void LuxPanel::tickStateMachine( int msTicksDelta )
 				{
 					exposureSetting++;
 				}
-				dataWheel.removeDiff(7);
+				dataWheel.removeDiff(5);
 				
 			}
 			if( dataWheel.getDiff() < 0 )
@@ -303,7 +279,7 @@ void LuxPanel::tickStateMachine( int msTicksDelta )
 				{
 					exposureSetting--;
 				}
-				dataWheel.removeDiff(7);
+				dataWheel.removeDiff(5);
 				
 			}
 			//Draw new value
@@ -314,7 +290,7 @@ void LuxPanel::tickStateMachine( int msTicksDelta )
 		}
 		if( downButton.serviceRisingEdge() )
 		{
-			nextState = PSetFStopInit;
+			nextState = PSetISOInit;
 		}
 		upButton.serviceRisingEdge();
 		break;

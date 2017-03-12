@@ -7,6 +7,11 @@
 #include "LightMeterPanelComponents.h"
 #include "TeensyView.h"
 
+extern const float fStopTable[];
+extern const float exposureTable[];
+extern const float isoTable[];
+extern uint8_t isoTableSize;
+
 enum PState_t
 {
 	PInit,
@@ -123,6 +128,68 @@ public:
 	void eraseTypeArea( void ){
 		rectFill(0,10,25,21,BLACK,NORM); //x,y,w,h,c,m
 	};
+	void eraseLowerArea( void ){
+		rectFill(0,9,128,22,BLACK,NORM); //x,y,w,h,c,m
+	}
+	void drawMenu(const char *name, bool lArrow, bool rArrow )
+	{
+		setCursor(10,0);
+		print(name);
+		eraseArrows();
+		if( lArrow ) drawLeftArrow();
+		if( rArrow ) drawRightArrow();
+		drawSeperator1();
+	}
+	void drawMenu(const char *name, uint16_t isoValue, bool lArrow, bool rArrow )
+	{
+		drawMenu(name, lArrow, rArrow );
+		setCursor(71,0);
+		print("ISO");
+		setCursor(88,0);
+		print(":");
+		setCursor(92,0);
+		print(isoValue);
+	}
+	void drawISOScale( uint8_t isoSetting )
+	{
+		uint8_t x1, x2, x3;
+		eraseLowerArea();
+		if( isoTable[isoSetting] < 1000 )
+		{
+			x2 = 53;
+			x3 = x2 + 28;
+		}
+		else
+		{
+			x2 = 48;
+			x3 = x2 + 37;
+		}
+		setFontType(1); 
+		setCursor(x2,15);
+		print(isoTable[isoSetting], 0);
+		setFontType(0);
+		if( isoSetting < (isoTableSize - 1) )
+		{
+			//draw next higher value
+			setCursor( x3, 19 );
+			print( isoTable[isoSetting + 1], 0 );
+		}
+		if( isoSetting > 0 )
+		{
+			if( isoTable[isoSetting - 1] < 1000 )
+			{
+				x1 = x2 - 20;
+			}
+			else
+			{
+				x1 = x2 - 26;
+			}
+			//draw next lower value
+			setCursor( x1, 19 );
+			print( isoTable[isoSetting - 1], 0 );
+		}
+	}
+		
 };
 
 #endif
