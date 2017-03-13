@@ -35,7 +35,7 @@ LuxPanel::LuxPanel( void )
 	
 	fStopSetting = 7;
 	exposureSetting = 5;
-	isoSetting = 2;
+	isoSetting = 3;
 	state = PInit;
 	
 }
@@ -107,10 +107,31 @@ void LuxPanel::tickStateMachine( int msTicksDelta )
 		oled.clear(PAGE);
 		oled.drawMenu("Photo", isoTable[isoSetting], true, true );
 
-		oled.drawBrackets();
+		//oled.drawBrackets();
 		nextState = PDisplayPhotoValue;
 		break;
 	case PDisplayPhotoValue:
+		if( dataWheel.serviceChanged() )
+		{
+			if( dataWheel.getDiff() > 0 )
+			{
+				if( fStopSetting < 23 )
+				{
+					fStopSetting++;
+				}
+				dataWheel.removeDiff(7);
+				
+			}
+			if( dataWheel.getDiff() < 0 )
+			{
+				if( fStopSetting > 0 )
+				{
+					fStopSetting--;
+				}
+				dataWheel.removeDiff(7);
+				
+			}
+		}
 		if( downButton.serviceRisingEdge() )
 		{
 			nextState = PDisplayLuxValueInit;
@@ -127,16 +148,18 @@ void LuxPanel::tickStateMachine( int msTicksDelta )
 				double lux;    // Resulting lux value
 				boolean good = light.getLux(gain,ms,data0,data1,lux);  // True if neither sensor is saturated
 				// Print out the results:
-				//oled.setCursor(0,11);
-				//oled.print(" lux: ");
-				//oled.print(lux);
-				//oled.setCursor(90,11);
-				//if (good) oled.print("(good)");	else oled.print("      ");
-				float T = pow(fStopTable[fStopSetting],2)*64/(lux*(1/exposureTable[exposureSetting]));
-				oled.setCursor(33,13);
-				oled.print("         ");
-				oled.setCursor(33,13);
-				oled.print(T,2);
+				//exposure time = stop squared * K / ( ISO * Lux )
+				#define KValue 64
+				float T = pow(fStopTable[fStopSetting],2)*KValue/(lux*(isoTable[isoSetting]));
+				oled.eraseLowerArea();
+				oled.drawLeftBracket(32,10);
+				oled.drawRightBracket(122,10);
+				oled.drawFNumStyle1( fStopTable[fStopSetting], 2, 13 );
+				oled.drawExposureStyle1( T, 60, 14 );
+				oled.setFontType(1);
+				oled.setCursor( 112, 13 );
+				oled.print("s");
+				oled.setFontType(0);
 				drawDisplay = true;
 			}
 		}

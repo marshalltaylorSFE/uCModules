@@ -84,36 +84,37 @@ public:
 		drawByte(3,0,0x10);
 		drawByte(4,0,0x10);
 	};
-	void drawBrackets( void ){
-		drawByte(27,10,0x7F);
-		drawByte(28,10,0xFF);
-		drawByte(29,10,0xC0);
-		drawByte(30,10,0xC0);
+	void drawLeftBracket( uint8_t xIn, uint8_t yIn ){
+		drawByte(xIn + 2,yIn + 0,0x7F);
+		drawByte(xIn + 3,yIn + 0,0xFF);
+		drawByte(xIn + 4,yIn + 0,0xC0);
+		drawByte(xIn + 5,yIn + 0,0xC0);
 
-		drawByte(25,18,0x20);
-		drawByte(26,18,0x70);
-		drawByte(27,18,0xFF);
-		drawByte(28,18,0xDF);
+		drawByte(xIn + 0,yIn + 8,0x20);
+		drawByte(xIn + 1,yIn + 8,0x70);
+		drawByte(xIn + 2,yIn + 8,0xFF);
+		drawByte(xIn + 3,yIn + 8,0xDF);
 
-		drawByte(27,26,0xF0);
-		drawByte(28,26,0xF8);
-		drawByte(29,26,0x18);
-		drawByte(30,26,0x18);
+		drawByte(xIn + 2,yIn + 16,0xF0);
+		drawByte(xIn + 3,yIn + 16,0xF8);
+		drawByte(xIn + 4,yIn + 16,0x18);
+		drawByte(xIn + 5,yIn + 16,0x18);
+	};
+	void drawRightBracket( uint8_t xIn, uint8_t yIn ){
+		drawByte(xIn + 0,yIn + 0,0xC0);
+		drawByte(xIn + 1,yIn + 0,0xC0);
+		drawByte(xIn + 2,yIn + 0,0xFF);
+		drawByte(xIn + 3,yIn + 0,0x7F);
 
-		drawByte(125,10,0x7F);
-		drawByte(124,10,0xFF);
-		drawByte(123,10,0xC0);
-		drawByte(122,10,0xC0);
+		drawByte(xIn + 2,yIn + 8,0xDF);
+		drawByte(xIn + 3,yIn + 8,0xFF);
+		drawByte(xIn + 4,yIn + 8,0x70);
+		drawByte(xIn + 5,yIn + 8,0x20);
 
-		drawByte(127,18,0x20);
-		drawByte(126,18,0x70);
-		drawByte(125,18,0xFF);
-		drawByte(124,18,0xDF);
-
-		drawByte(125,26,0xF0);
-		drawByte(124,26,0xF8);
-		drawByte(123,26,0x18);
-		drawByte(122,26,0x18);
+		drawByte(xIn + 0,yIn + 16,0x18);
+		drawByte(xIn + 1,yIn + 16,0x18);
+		drawByte(xIn + 2,yIn + 16,0xF8);
+		drawByte(xIn + 3,yIn + 16,0xF0);
 	};
 	void eraseArrows( void ){
 		rectFill(0,0,7,8,BLACK,NORM); //x,y,w,h,c,m
@@ -130,7 +131,10 @@ public:
 	};
 	void eraseLowerArea( void ){
 		rectFill(0,9,128,22,BLACK,NORM); //x,y,w,h,c,m
-	}
+	};
+	void eraseOuterLowerArea( void ){
+		rectFill(0,9,24,30,BLACK,NORM); //x,y,w,h,c,m
+	};
 	void drawMenu(const char *name, bool lArrow, bool rArrow )
 	{
 		setCursor(10,0);
@@ -139,7 +143,7 @@ public:
 		if( lArrow ) drawLeftArrow();
 		if( rArrow ) drawRightArrow();
 		drawSeperator1();
-	}
+	};
 	void drawMenu(const char *name, uint16_t isoValue, bool lArrow, bool rArrow )
 	{
 		drawMenu(name, lArrow, rArrow );
@@ -149,7 +153,7 @@ public:
 		print(":");
 		setCursor(92,0);
 		print(isoValue);
-	}
+	};
 	void drawISOScale( uint8_t isoSetting )
 	{
 		uint8_t x1, x2, x3;
@@ -188,8 +192,51 @@ public:
 			setCursor( x1, 19 );
 			print( isoTable[isoSetting - 1], 0 );
 		}
-	}
+	};
+	void drawExposureStyle1( float exposureTime, uint8_t xIn, uint8_t yIn )
+	{	
 		
+		if( exposureTime < 1 )
+		{
+			setCursor(xIn,yIn);
+			print("1");
+			line(xIn + 4, yIn + 10, xIn + 9, yIn + 2, WHITE, NORM);
+			setCursor(xIn + 10,yIn + 5);
+			print(1 / exposureTime, 0 );
+		}
+		else
+		{
+			setCursor(xIn,yIn + 3);
+			print(exposureTime,1);
+		}
+	};
+	void drawFNumStyle1( float fNumIn, uint8_t xIn, uint8_t yIn )
+	{	
+		setCursor(xIn,yIn + 4);
+		print("F");
+		setFontType(1);
+		uint16_t whole = (uint16_t)fNumIn;
+		float partial = ( fNumIn - whole );
+		if( partial > 0 )
+		{
+			//Print 1 dec
+			setCursor(xIn + 8,yIn);
+			print( whole );
+			setCursor(xIn + 18,yIn);
+			print( partial * 10, 0 );
+			pixel(xIn + 15,yIn + 10, WHITE,NORM);
+			pixel(xIn + 15,yIn + 11, WHITE,NORM);
+			pixel(xIn + 16,yIn + 10, WHITE,NORM);
+			pixel(xIn + 16,yIn + 11, WHITE,NORM);
+		}
+		else
+		{
+			//Print whole
+			setCursor(xIn + 8,yIn);
+			print( whole );
+		}
+		setFontType(0);
+	};
 };
 
 #endif
