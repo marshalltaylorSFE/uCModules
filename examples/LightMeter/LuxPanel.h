@@ -15,16 +15,26 @@ extern uint8_t isoTableSize;
 enum PState_t
 {
 	PInit,
-	PDisplayLuxValueInit,
-	PDisplayLuxValue,
 	PDisplayPhotoValueInit,
 	PDisplayPhotoValue,
-	PSetFStopInit,
-	PSetFStop,
+	PDisplayVideoValueInit,
+	PDisplayVideoValue,
 	PSetISOInit,
 	PSetISO,
+	//Not enabled:
+	PDisplayLuxValueInit,
+	PDisplayLuxValue,
+	PSetFStopInit,
+	PSetFStop,
 	PSetExposureInit,
 	PSetExposure
+};
+
+enum holdState_t
+{
+	hSRun,
+	hSAveraging,
+	hSHeld
 };
 
 class LuxPanel : public Panel
@@ -34,10 +44,19 @@ public:
 	void tickStateMachine( int msTicksDelta );
 
 private:
+	void updateLux( double inputLux );
+	double lux;
+	double luxAccumulator;
+	uint32_t sampleCount;
+	bool good;
+
+	holdState_t triggerState;
+
 	Button upButton;
 	Button downButton;
 	Button encButton;
 	RotoryEncoder dataWheel;
+	
 	
 	PState_t state;
 	uint8_t fStopSetting;
@@ -210,6 +229,14 @@ public:
 			print(exposureTime,1);
 		}
 	};
+	void drawExposureStyle2( float exposureTime, uint8_t xIn, uint8_t yIn )
+	{	
+		setCursor(xIn,yIn);
+		print("1");
+		line(xIn + 4, yIn + 10, xIn + 9, yIn + 2, WHITE, NORM);
+		setCursor(xIn + 10,yIn + 5);
+		print(1 / exposureTime, 0 );
+	};
 	void drawFNumStyle1( float fNumIn, uint8_t xIn, uint8_t yIn )
 	{	
 		setCursor(xIn,yIn + 4);
@@ -237,6 +264,68 @@ public:
 		}
 		setFontType(0);
 	};
-};
+	void drawFNumStyle2( float fNumIn, uint8_t xIn, uint8_t yIn ) // always 1 decimal
+	{	
+		setCursor(xIn,yIn);
+		print("F");
+		setFontType(1);
+		line(xIn + 4, yIn + 10, xIn + 9, yIn + 2, WHITE, NORM);
+		long whole = (long)fNumIn;
+		float partial = ( fNumIn - (long)fNumIn );
+		//Print 1 dec
+		setCursor(xIn + 10,yIn + 5);
+		print( fNumIn );
+		//print( whole );
+		//setCursor(xIn + 20,yIn + 5);
+		//print( partial * 10, 0 );
+		//pixel(xIn + 17,yIn + 15, WHITE,NORM);
+		//pixel(xIn + 17,yIn + 16, WHITE,NORM);
+		//pixel(xIn + 18,yIn + 15, WHITE,NORM);
+		//pixel(xIn + 18,yIn + 16, WHITE,NORM);
+		setFontType(0);
+	};
+	void holdStyle1( uint8_t xIn, uint8_t yIn )
+	{
+		drawByte(xIn + 0,yIn + 0,0xF8);
+		drawByte(xIn + 1,yIn + 0,0x20);
+		drawByte(xIn + 2,yIn + 0,0x20);
+		drawByte(xIn + 3,yIn + 0,0xF8);
+		
+		drawByte(xIn + 5,yIn + 0,0x30);
+		drawByte(xIn + 6,yIn + 0,0x48);
+		drawByte(xIn + 7,yIn + 0,0x48);
+		drawByte(xIn + 8,yIn + 0,0x30);
+
+		drawByte(xIn + 10,yIn + 0,0x78);
+		drawByte(xIn + 11,yIn + 0,0x08);
+		drawByte(xIn + 12,yIn + 0,0x08);
+
+		drawByte(xIn + 14,yIn + 0,0x78);
+		drawByte(xIn + 15,yIn + 0,0x48);
+		drawByte(xIn + 16,yIn + 0,0x30);
+
+	};
+	void aveStyle1( uint8_t xIn, uint8_t yIn )
+	{
+		drawByte(xIn + 0,yIn + 0,0x80);
+		drawByte(xIn + 1,yIn + 0,0x80);
+		drawByte(xIn + 2,yIn + 0,0xF8);
+		drawByte(xIn + 3,yIn + 0,0x80);
+		drawByte(xIn + 4,yIn + 0,0x80);
+
+		drawByte(xIn + 5,yIn + 0,0x78);
+		drawByte(xIn + 6,yIn + 0,0x50);
+		drawByte(xIn + 7,yIn + 0,0x28);
+
+		drawByte(xIn + 9,yIn + 0,0x48);
+		drawByte(xIn + 10,yIn + 0,0x78);
+		drawByte(xIn + 11,yIn + 0,0x48);
+
+		drawByte(xIn + 13,yIn + 0,0x70);
+		drawByte(xIn + 14,yIn + 0,0x88);
+		drawByte(xIn + 15,yIn + 0,0xA8);
+		drawByte(xIn + 16,yIn + 0,0x30);
+
+	};};
 
 #endif

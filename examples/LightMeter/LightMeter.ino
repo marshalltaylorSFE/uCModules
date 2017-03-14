@@ -44,7 +44,7 @@ void setup()
 		Serial.println("ERROR");
 	}
 	gain = 0;
-	unsigned char time = 2;
+	unsigned char time = 1;
 	Serial.println("Set timing...");
 	light.setTiming(gain,time,ms);
 	Serial.println("Powerup...");

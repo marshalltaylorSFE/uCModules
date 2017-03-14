@@ -15,7 +15,7 @@ extern boolean gain;     // Gain setting, 0 = X1, 1 = X16;
 extern unsigned int ms;  // Integration ("shutter") time in milliseconds
 
 const float fStopTable[24] = {1.4, 1.8, 2.0, 2.2, 2.5, 2.8, 3.2, 3.5, 4, 4.5, 5, 5.6, 6.3, 7.1, 8, 9, 10, 11, 13, 14, 16, 18, 20, 22};
-const float exposureTable[12] = {2, 4, 8, 15, 30, 60, 125, 250, 500, 1000, 2000, 4000};
+const float exposureTable[3] = {0.041666666, 0.033333333, 0.016666666};
 const float isoTable[7] = {100, 200, 400, 800, 1600, 3200, 6400};
 uint8_t isoTableSize = 7;
 
@@ -34,9 +34,16 @@ LuxPanel::LuxPanel( void )
 	add( &dataWheel );
 	
 	fStopSetting = 7;
-	exposureSetting = 5;
+	exposureSetting = 1;
 	isoSetting = 3;
 	state = PInit;
+	good = false;
+	
+	luxAccumulator = 0;
+	sampleCount = 0;
+	lux = 0;
+	
+	triggerState = hSRun;
 	
 }
 
@@ -56,56 +63,12 @@ void LuxPanel::tickStateMachine( int msTicksDelta )
 		//Can't be running, if button pressed move on
 		oled.clear(PAGE);
 		drawDisplay = true;
-		nextState = PDisplayLuxValueInit;
-		break;
-	case PDisplayLuxValueInit:
-		drawDisplay = true;
-		oled.clear(PAGE);
-		//menu part
-		oled.drawMenu("Lux", false, true );
-		nextState = PDisplayLuxValue;
-		break;
-	case PDisplayLuxValue:
-		if( upButton.serviceRisingEdge() )
-		{
-			nextState = PDisplayPhotoValueInit;
-		}
-		downButton.serviceRisingEdge();
-		
-		if (light.getData(data0,data1))
-		{
-			drawDisplay = true;
-			//oled.setCursor(0,8);
-			// getData() returned true, communication was successful
-			//oled.print(" data0: ");
-			//oled.print(data0);
-			//oled.setCursor(0,16);
-			//oled.print(" data1: ");
-			//oled.print(data1);
-			double lux;    // Resulting lux value
-			boolean good;  // True if neither sensor is saturated
-			// Perform lux calculation:
-			good = light.getLux(gain,ms,data0,data1,lux);
-			// Print out the results:
-			oled.setCursor(0,11);
-			oled.print(" lux: ");
-			oled.print(lux);
-			oled.setCursor(90,11);
-			if (good) oled.print("(good)");	else oled.print("      ");
-		}
-		else
-		{
-			drawDisplay = true;
-			oled.setCursor(0,11);
-			oled.print("ERROR");
-		}
-
-
+		nextState = PDisplayPhotoValueInit;
 		break;
 	case PDisplayPhotoValueInit:
 		drawDisplay = true;
 		oled.clear(PAGE);
-		oled.drawMenu("Photo", isoTable[isoSetting], true, true );
+		oled.drawMenu("Photo", isoTable[isoSetting], false, true );
 
 		//oled.drawBrackets();
 		nextState = PDisplayPhotoValue;
@@ -132,22 +95,18 @@ void LuxPanel::tickStateMachine( int msTicksDelta )
 				
 			}
 		}
-		if( downButton.serviceRisingEdge() )
+		if( upButton.serviceRisingEdge() )
 		{
-			nextState = PDisplayLuxValueInit;
-		}
-		else if( upButton.serviceRisingEdge() )
-		{
-			nextState = PSetFStopInit;
+			nextState = PDisplayVideoValueInit;
 		}
 		else
 		{
 			if (light.getData(data0,data1))
 			{
 				//get the lux
-				double lux;    // Resulting lux value
-				boolean good = light.getLux(gain,ms,data0,data1,lux);  // True if neither sensor is saturated
-				// Print out the results:
+				double tempLux;
+				good = light.getLux(gain,ms,data0,data1,tempLux);  // True if neither sensor is saturated
+				updateLux( tempLux );
 				//exposure time = stop squared * K / ( ISO * Lux )
 				#define KValue 64
 				float T = pow(fStopTable[fStopSetting],2)*KValue/(lux*(isoTable[isoSetting]));
@@ -156,12 +115,136 @@ void LuxPanel::tickStateMachine( int msTicksDelta )
 				oled.drawRightBracket(122,10);
 				oled.drawFNumStyle1( fStopTable[fStopSetting], 2, 13 );
 				oled.drawExposureStyle1( T, 60, 14 );
-				oled.setFontType(1);
-				oled.setCursor( 112, 13 );
-				oled.print("s");
-				oled.setFontType(0);
+				if( triggerState == hSHeld )
+				{
+					oled.holdStyle1( 100, 10 );
+				}
+				if( triggerState == hSAveraging )
+				{
+					oled.aveStyle1( 100, 10 );
+				}
+				oled.setCursor( 111, 17 );
+				oled.print("S");
 				drawDisplay = true;
 			}
+		}
+		downButton.serviceRisingEdge();
+		break;
+	case PDisplayVideoValueInit:
+		drawDisplay = true;
+		oled.clear(PAGE);
+		oled.drawMenu("Video", isoTable[isoSetting], true, true );
+
+		//oled.drawBrackets();
+		nextState = PDisplayVideoValue;
+		break;
+	case PDisplayVideoValue:
+		if( dataWheel.serviceChanged() )
+		{
+			if( dataWheel.getDiff() > 0 )
+			{
+				if( exposureSetting < 2 )
+				{
+					exposureSetting++;
+				}
+				dataWheel.removeDiff(7);
+				
+			}
+			if( dataWheel.getDiff() < 0 )
+			{
+				if( exposureSetting > 0 )
+				{
+					exposureSetting--;
+				}
+				dataWheel.removeDiff(7);
+				
+			}
+		}
+		if( downButton.serviceRisingEdge() )
+		{
+			nextState = PDisplayPhotoValueInit;
+		}
+		else if( upButton.serviceRisingEdge() )
+		{
+			nextState = PSetISOInit;
+		}
+		else
+		{
+			if (light.getData(data0,data1))
+			{
+				//get the lux
+				double tempLux;
+				good = light.getLux(gain,ms,data0,data1,tempLux);  // True if neither sensor is saturated
+				updateLux( tempLux );
+				//exposure time = stop squared * K / ( ISO * Lux )
+				#define KValue 64
+				//float T = pow(fStopTable[fStopSetting],2)*KValue/(lux*(isoTable[isoSetting]));
+				float N = sqrt((exposureTable[exposureSetting]*lux*isoTable[isoSetting])/KValue);
+				oled.eraseLowerArea();
+				oled.drawLeftBracket(32,10);
+				oled.drawRightBracket(122,10);
+				oled.drawExposureStyle2( exposureTable[exposureSetting], 2, 13 );
+				oled.drawFNumStyle2( N, 60, 14 );
+				if( triggerState == hSHeld )
+				{
+					oled.holdStyle1( 100, 10 );
+				}
+				if( triggerState == hSAveraging )
+				{
+					oled.aveStyle1( 100, 10 );
+				}
+				drawDisplay = true;
+			}
+		}
+		break;
+	case PSetISOInit:
+		dataWheel.clearDiff();
+		drawDisplay = true;
+		oled.clear(PAGE);
+		//menu part
+		oled.drawMenu("ISO", true, false );
+
+		//Draw last value
+		oled.drawISOScale( isoSetting );
+		
+		nextState = PSetISO;
+		break;
+	case PSetISO:
+		if( dataWheel.serviceChanged() )
+		{
+			drawDisplay = true;
+			//Erase part
+			oled.setCursor(0,11);
+			oled.print("      ");
+        
+			if( dataWheel.getDiff() > 0 )
+			{
+				if( isoSetting < 6 )
+				{
+					isoSetting++;
+				}
+				dataWheel.removeDiff(8);
+				
+			}
+			if( dataWheel.getDiff() < 0 )
+			{
+				if( isoSetting > 0 )
+				{
+					isoSetting--;
+				}
+				dataWheel.removeDiff(8);
+				
+			}
+			//Draw new value
+			oled.drawISOScale( isoSetting );
+		}
+		if( downButton.serviceRisingEdge() )
+		{
+			nextState = PDisplayVideoValueInit;
+		}
+		if( upButton.serviceRisingEdge() )
+		{
+			//nextState = PSetFStopInit;
 		}
 		break;
 	case PSetFStopInit:
@@ -209,54 +292,21 @@ void LuxPanel::tickStateMachine( int msTicksDelta )
 		}
 		if( downButton.serviceRisingEdge() )
 		{
-			nextState = PDisplayPhotoValueInit;
+			nextState = PSetISOInit;
 		}
 		if( upButton.serviceRisingEdge() )
 		{
-			nextState = PSetISOInit;
+			nextState = PDisplayLuxValueInit;
 		}
 		break;
-	case PSetISOInit:
-		dataWheel.clearDiff();
+	case PDisplayLuxValueInit:
 		drawDisplay = true;
 		oled.clear(PAGE);
 		//menu part
-		oled.drawMenu("ISO", true, true );
-
-		//Draw last value
-		oled.drawISOScale( isoSetting );
-		
-		nextState = PSetISO;
+		oled.drawMenu("Lux", false, true );
+		nextState = PDisplayLuxValue;
 		break;
-	case PSetISO:
-		if( dataWheel.serviceChanged() )
-		{
-			drawDisplay = true;
-			//Erase part
-			oled.setCursor(0,11);
-			oled.print("      ");
-        
-			if( dataWheel.getDiff() > 0 )
-			{
-				if( isoSetting < 6 )
-				{
-					isoSetting++;
-				}
-				dataWheel.removeDiff(8);
-				
-			}
-			if( dataWheel.getDiff() < 0 )
-			{
-				if( isoSetting > 0 )
-				{
-					isoSetting--;
-				}
-				dataWheel.removeDiff(8);
-				
-			}
-			//Draw new value
-			oled.drawISOScale( isoSetting );
-		}
+	case PDisplayLuxValue:
 		if( downButton.serviceRisingEdge() )
 		{
 			nextState = PSetFStopInit;
@@ -265,6 +315,27 @@ void LuxPanel::tickStateMachine( int msTicksDelta )
 		{
 			nextState = PSetExposureInit;
 		}
+		if (light.getData(data0,data1))
+		{
+			drawDisplay = true;
+			double tempLux;
+			good = light.getLux(gain,ms,data0,data1,tempLux);  // True if neither sensor is saturated
+			updateLux( tempLux );
+			// Print out the results:
+			oled.setCursor(0,11);
+			oled.print(" lux: ");
+			oled.print(lux);
+			oled.setCursor(90,11);
+			if (good) oled.print("(good)");	else oled.print("      ");
+		}
+		else
+		{
+			drawDisplay = true;
+			oled.setCursor(0,11);
+			oled.print("ERROR");
+		}
+
+
 		break;
 	case PSetExposureInit:
 		dataWheel.clearDiff();
@@ -313,7 +384,7 @@ void LuxPanel::tickStateMachine( int msTicksDelta )
 		}
 		if( downButton.serviceRisingEdge() )
 		{
-			nextState = PSetISOInit;
+			nextState = PDisplayLuxValueInit;
 		}
 		upButton.serviceRisingEdge();
 		break;
@@ -322,27 +393,65 @@ void LuxPanel::tickStateMachine( int msTicksDelta )
 		break;
 	}
 	state = nextState;
-	
+
 	if( drawDisplay )oled.display();
 	
 	
+	holdState_t nextTriggerState = triggerState;
+	switch( triggerState )
+	{
+	case hSRun:
+		//Can't be running, if button pressed move on
+		if( encButton.serviceRisingEdge() )
+		{
+			nextTriggerState = hSAveraging;
+			luxAccumulator = lux;
+			sampleCount = 1;
+		}
+		encButton.serviceFallingEdge();
+		break;
+	case hSAveraging:
+		if( encButton.serviceFallingEdge() )
+		{
+			nextTriggerState = hSHeld;
+		}
+		break;
+	case hSHeld:
+		if( encButton.serviceRisingEdge() )
+		{
+			nextTriggerState = hSRun;
+			luxAccumulator = 0;
+			sampleCount = 0;
+		}
+		break;
 	
 	
-	
-	
-	
-//	//Do logic here
-//	//Serial.println(upButton.getState());
-//	//Serial.println(downButton.getState());
-//	if(upButton.serviceRisingEdge()) Serial.println("RisingEdge");
-//	if(upButton.serviceFallingEdge()) Serial.println("FallingEdge");
-//	if(upButton.serviceHoldRisingEdge()) Serial.println("HoldRisingEdge");
-//	if(upButton.serviceHoldFallingEdge()) Serial.println("HoldFallingEdge");
-//	
-//	if(dataWheel.serviceChanged())
-//	{
-//		Serial.println( dataWheel.getDiff() );
-//		dataWheel.removeDiff(1);
-//		
-//	}
+	default:
+		luxAccumulator = 0;
+		sampleCount = 0;
+		lux = 0;
+		nextTriggerState = hSRun;
+		break;
+	}
+	triggerState = nextTriggerState;
 }
+
+void LuxPanel::updateLux( double inputLux )
+{
+	if( triggerState == hSAveraging )
+	{
+		luxAccumulator += inputLux;
+		sampleCount++;
+		lux = luxAccumulator / sampleCount;
+	}
+	if( triggerState == hSRun )
+	{
+		lux = inputLux;
+	}
+	if( triggerState == hSHeld )
+	{
+		lux = luxAccumulator / sampleCount;
+	}
+
+}
+
