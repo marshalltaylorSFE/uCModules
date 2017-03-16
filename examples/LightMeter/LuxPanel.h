@@ -21,6 +21,8 @@ enum PState_t
 	PDisplayVideoValue,
 	PSetISOInit,
 	PSetISO,
+	pSystemInit,
+	pSystem,
 	//Not enabled:
 	PDisplayLuxValueInit,
 	PDisplayLuxValue,
@@ -42,7 +44,9 @@ class LuxPanel : public Panel
 public:
 	LuxPanel( void );
 	void tickStateMachine( int msTicksDelta );
-
+	
+	bool lipoGood;
+	
 private:
 	void updateLux( double inputLux );
 	double lux;

@@ -6,6 +6,7 @@
 #include <Arduino.h>
 #include "TeensyView.h"
 #include <SparkFunTSL2561.h>
+#include <SparkFunBQ27441.h>
 
 extern OLEDFunctions oled;
 
@@ -18,6 +19,8 @@ const float fStopTable[24] = {1.4, 1.8, 2.0, 2.2, 2.5, 2.8, 3.2, 3.5, 4, 4.5, 5,
 const float exposureTable[3] = {0.041666666, 0.033333333, 0.016666666};
 const float isoTable[7] = {100, 200, 400, 800, 1600, 3200, 6400};
 uint8_t isoTableSize = 7;
+
+extern const uint8_t PIN_POWER_ON = 16;
 
 LuxPanel::LuxPanel( void )
 {
@@ -44,6 +47,8 @@ LuxPanel::LuxPanel( void )
 	lux = 0;
 	
 	triggerState = hSRun;
+	
+	lipoGood = false;
 	
 }
 
@@ -202,7 +207,7 @@ void LuxPanel::tickStateMachine( int msTicksDelta )
 		drawDisplay = true;
 		oled.clear(PAGE);
 		//menu part
-		oled.drawMenu("ISO", true, false );
+		oled.drawMenu("ISO", true, true );
 
 		//Draw last value
 		oled.drawISOScale( isoSetting );
@@ -241,6 +246,76 @@ void LuxPanel::tickStateMachine( int msTicksDelta )
 		if( downButton.serviceRisingEdge() )
 		{
 			nextState = PDisplayVideoValueInit;
+		}
+		if( upButton.serviceRisingEdge() )
+		{
+			nextState = pSystemInit;
+		}
+		break;
+	case pSystemInit:
+		dataWheel.clearDiff();
+		drawDisplay = true;
+		oled.clear(PAGE);
+		//menu part
+		oled.drawMenu("System", true, false );
+
+		//Draw last value
+		oled.setCursor(0,11);
+		oled.print((float)lipo.voltage()/1000, 2);
+		//Clear wheel state
+		dataWheel.serviceChanged();
+		nextState = pSystem;
+		break;
+	case pSystem:
+//		if( dataWheel.serviceChanged() )
+//		{
+//			drawDisplay = true;
+//			//Erase part
+//			oled.setCursor(0,11);
+//			oled.print("      ");
+//        
+//			if( dataWheel.getDiff() > 0 )
+//			{
+//				if( fStopSetting < 23 )
+//				{
+//					fStopSetting++;
+//				}
+//				dataWheel.removeDiff(7);
+//				
+//			}
+//			if( dataWheel.getDiff() < 0 )
+//			{
+//				if( fStopSetting > 0 )
+//				{
+//					fStopSetting--;
+//				}
+//				dataWheel.removeDiff(7);
+//				
+//			}
+//		}
+		//Draw new value
+		if( lipoGood == true )
+		{
+			oled.setCursor(0,20);
+			oled.print("BB Good");
+		}
+		else
+		{
+			oled.setCursor(0,20);
+			oled.print("BB Bad");
+		}
+		oled.setCursor(0,11);
+		oled.print((float)lipo.voltage()/1000, 2);
+		if( dataWheel.serviceChanged() )
+		{
+			digitalWrite(PIN_POWER_ON, LOW);
+			oled.setCursor(40, 11);
+			oled.print("Power down.");
+		}
+		drawDisplay = true;
+		if( downButton.serviceRisingEdge() )
+		{
+			nextState = PSetISOInit;
 		}
 		if( upButton.serviceRisingEdge() )
 		{
