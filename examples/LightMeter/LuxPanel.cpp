@@ -74,7 +74,7 @@ void LuxPanel::tickStateMachine( int msTicksDelta )
 		drawDisplay = true;
 		oled.clear(PAGE);
 		oled.drawMenu("Photo", isoTable[isoSetting], false, true );
-
+		oled.batteryStyle1(116, 0, (float)lipo.soc() / 100);
 		//oled.drawBrackets();
 		nextState = PDisplayPhotoValue;
 		break;
@@ -139,6 +139,7 @@ void LuxPanel::tickStateMachine( int msTicksDelta )
 		drawDisplay = true;
 		oled.clear(PAGE);
 		oled.drawMenu("Video", isoTable[isoSetting], true, true );
+		oled.batteryStyle1(116, 0, (float)lipo.soc() / 100);
 
 		//oled.drawBrackets();
 		nextState = PDisplayVideoValue;
@@ -208,6 +209,7 @@ void LuxPanel::tickStateMachine( int msTicksDelta )
 		oled.clear(PAGE);
 		//menu part
 		oled.drawMenu("ISO", true, true );
+		oled.batteryStyle1(116, 0, (float)lipo.soc() / 100);
 
 		//Draw last value
 		oled.drawISOScale( isoSetting );
@@ -258,59 +260,54 @@ void LuxPanel::tickStateMachine( int msTicksDelta )
 		oled.clear(PAGE);
 		//menu part
 		oled.drawMenu("System", true, false );
+		oled.batteryStyle1(116, 0, (float)lipo.soc() / 100);
 
 		//Draw last value
 		oled.setCursor(0,11);
 		oled.print((float)lipo.voltage()/1000, 2);
+		oled.print("mV");
+
+		oled.setCursor(64,11);
+		oled.print((float)lipo.soc()/100, 2);
+		oled.print("%");
+
 		//Clear wheel state
 		dataWheel.serviceChanged();
 		nextState = pSystem;
 		break;
 	case pSystem:
-//		if( dataWheel.serviceChanged() )
-//		{
-//			drawDisplay = true;
-//			//Erase part
-//			oled.setCursor(0,11);
-//			oled.print("      ");
-//        
-//			if( dataWheel.getDiff() > 0 )
-//			{
-//				if( fStopSetting < 23 )
-//				{
-//					fStopSetting++;
-//				}
-//				dataWheel.removeDiff(7);
-//				
-//			}
-//			if( dataWheel.getDiff() < 0 )
-//			{
-//				if( fStopSetting > 0 )
-//				{
-//					fStopSetting--;
-//				}
-//				dataWheel.removeDiff(7);
-//				
-//			}
-//		}
 		//Draw new value
 		if( lipoGood == true )
 		{
 			oled.setCursor(0,20);
-			oled.print("BB Good");
+			oled.print("Sitter OK");
 		}
 		else
 		{
 			oled.setCursor(0,20);
-			oled.print("BB Bad");
+			oled.print("No sitter");
 		}
 		oled.setCursor(0,11);
 		oled.print((float)lipo.voltage()/1000, 2);
-		if( dataWheel.serviceChanged() )
+		if( encButton.serviceRisingEdge() )
 		{
-			digitalWrite(PIN_POWER_ON, LOW);
-			oled.setCursor(40, 11);
+			oled.clear(PAGE);
+			oled.setFontType(1);
+			oled.setCursor(6, 6);
 			oled.print("Power down.");
+			oled.display();
+			delay(1000);
+			digitalWrite(PIN_POWER_ON, LOW);
+			delay(4000);
+			oled.clear(PAGE);
+			oled.setCursor(6, 6);
+			oled.print("Failed!!!");
+			oled.display();
+			delay(1000);
+			oled.setFontType(0);
+			oled.clear(PAGE);
+			oled.display();
+			
 		}
 		drawDisplay = true;
 		if( downButton.serviceRisingEdge() )

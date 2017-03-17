@@ -162,19 +162,19 @@ public:
 	{
 		setCursor(10,0);
 		print(name);
-		eraseArrows();
-		if( lArrow ) drawLeftArrow();
-		if( rArrow ) drawRightArrow();
+		//eraseArrows();
+		//if( lArrow ) drawLeftArrow();
+		//if( rArrow ) drawRightArrow();
 		drawSeperator1();
 	};
 	void drawMenu(const char *name, uint16_t isoValue, bool lArrow, bool rArrow )
 	{
 		drawMenu(name, lArrow, rArrow );
-		setCursor(71,0);
+		setCursor(68,0);
 		print("ISO");
-		setCursor(88,0);
+		setCursor(85,0);
 		print(":");
-		setCursor(92,0);
+		setCursor(89,0);
 		print(isoValue);
 	};
 	void drawISOScale( uint8_t isoSetting )
@@ -330,6 +330,28 @@ public:
 		drawByte(xIn + 15,yIn + 0,0xA8);
 		drawByte(xIn + 16,yIn + 0,0x30);
 
-	};};
+	};
+	void batteryStyle1( uint8_t xIn, uint8_t yIn, float percent )
+	{
+		drawByte(xIn + 0,yIn + 0,0xFE);
+		drawByte(xIn + 1,yIn + 0,0x82);
+		drawByte(xIn + 2,yIn + 0,0x82);
+		drawByte(xIn + 3,yIn + 0,0x82);
+		drawByte(xIn + 4,yIn + 0,0x82);
+		drawByte(xIn + 5,yIn + 0,0x82);
+		drawByte(xIn + 6,yIn + 0,0x82);
+		drawByte(xIn + 7,yIn + 0,0x82);
+		drawByte(xIn + 8,yIn + 0,0x82);
+		drawByte(xIn + 9,yIn + 0,0xEE);
+		drawByte(xIn + 10,yIn + 0,0x38);
+		//line(xIn, yIn + 1, xIn + (percent * 10), yIn + 1);
+		line(xIn + 2, yIn + 2, xIn + 2 + (percent * 7), yIn + 2);
+		line(xIn + 2, yIn + 3, xIn + 2 + (percent * 7), yIn + 3);
+		line(xIn + 2, yIn + 4, xIn + 2 + (percent * 7), yIn + 4);
+		//line(xIn, yIn + 5, xIn + (percent * 10), yIn + 5);
+		//rectFill(80 , 25, 84, 30);
+
+	};
+};
 
 #endif
