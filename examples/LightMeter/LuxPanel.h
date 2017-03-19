@@ -6,6 +6,7 @@
 //#include "HardwareInterfaces.h"  //included by panel
 #include "LightMeterPanelComponents.h"
 #include "TeensyView.h"
+#include <SparkFunBQ27441.h>
 
 extern const float fStopTable[];
 extern const float exposureTable[];
@@ -23,13 +24,10 @@ enum PState_t
 	PSetISO,
 	pSystemInit,
 	pSystem,
-	//Not enabled:
+	pMaryInit,
+	pMary,
 	PDisplayLuxValueInit,
 	PDisplayLuxValue,
-	PSetFStopInit,
-	PSetFStop,
-	PSetExposureInit,
-	PSetExposure
 };
 
 enum holdState_t
@@ -48,7 +46,7 @@ public:
 	bool lipoGood;
 	
 private:
-	void updateLux( double inputLux );
+	void updateLux( double inputLux ); // averaging function
 	double lux;
 	double luxAccumulator;
 	uint32_t sampleCount;
@@ -66,6 +64,7 @@ private:
 	uint8_t fStopSetting;
 	uint8_t exposureSetting;
 	uint8_t isoSetting;
+	uint8_t heartCount;
 	
 };
 
@@ -162,7 +161,11 @@ public:
 	{
 		setCursor(10,0);
 		print(name);
-		//eraseArrows();
+		batteryStyle1(116, 0, (float)lipo.soc() / 100);
+		if(lipo.current(AVG) >= 0)
+		{
+			drawPlug(106, 0);
+		}
 		//if( lArrow ) drawLeftArrow();
 		//if( rArrow ) drawRightArrow();
 		drawSeperator1();
@@ -170,11 +173,11 @@ public:
 	void drawMenu(const char *name, uint16_t isoValue, bool lArrow, bool rArrow )
 	{
 		drawMenu(name, lArrow, rArrow );
-		setCursor(68,0);
+		setCursor(60,0);
 		print("ISO");
-		setCursor(85,0);
+		setCursor(77,0);
 		print(":");
-		setCursor(89,0);
+		setCursor(81,0);
 		print(isoValue);
 	};
 	void drawISOScale( uint8_t isoSetting )
@@ -351,6 +354,64 @@ public:
 		//line(xIn, yIn + 5, xIn + (percent * 10), yIn + 5);
 		//rectFill(80 , 25, 84, 30);
 
+	};
+	void drawHeart( uint8_t xIn, uint8_t yIn )
+	{
+		drawByte(xIn + 0,yIn + 0,0x3C);
+		drawByte(xIn + 1,yIn + 0,0x7F);
+		drawByte(xIn + 2,yIn + 0,0xFF);
+		drawByte(xIn + 3,yIn + 0,0xFF);
+		drawByte(xIn + 4,yIn + 0,0xFF);
+		drawByte(xIn + 5,yIn + 0,0xFF);
+		drawByte(xIn + 6,yIn + 0,0x7F);
+		drawByte(xIn + 7,yIn + 0,0x3F);
+		drawByte(xIn + 8,yIn + 0,0x3F);
+		drawByte(xIn + 9,yIn + 0,0x7F);
+		drawByte(xIn + 10,yIn + 0,0xFF);
+		drawByte(xIn + 11,yIn + 0,0xFF);
+		drawByte(xIn + 12,yIn + 0,0xFF);
+		drawByte(xIn + 13,yIn + 0,0xFF);
+		drawByte(xIn + 14,yIn + 0,0x7F);
+		drawByte(xIn + 15,yIn + 0,0x3C);
+
+		drawByte(xIn + 0,yIn + 8,0x00);
+		drawByte(xIn + 1,yIn + 8,0x00);
+		drawByte(xIn + 2,yIn + 8,0x80);
+		drawByte(xIn + 3,yIn + 8,0xC0);
+		drawByte(xIn + 4,yIn + 8,0xE0);
+		drawByte(xIn + 5,yIn + 8,0xF0);
+		drawByte(xIn + 6,yIn + 8,0xF8);
+		drawByte(xIn + 7,yIn + 8,0xFC);
+		drawByte(xIn + 8,yIn + 8,0xFC);
+		drawByte(xIn + 9,yIn + 8,0xF8);
+		drawByte(xIn + 10,yIn + 8,0xF0);
+		drawByte(xIn + 11,yIn + 8,0xE0);
+		drawByte(xIn + 12,yIn + 8,0xC0);
+		drawByte(xIn + 13,yIn + 8,0x80);
+		drawByte(xIn + 14,yIn + 8,0x00);
+		drawByte(xIn + 15,yIn + 8,0x00);	
+	};
+	void drawPlug( uint8_t xIn, uint8_t yIn )
+	{
+		drawByte(xIn + 0,yIn + 0,0x28);
+		drawByte(xIn + 1,yIn + 0,0x28);
+		drawByte(xIn + 2,yIn + 0,0x7C);
+		drawByte(xIn + 3,yIn + 0,0x44);
+		drawByte(xIn + 4,yIn + 0,0x44);
+		drawByte(xIn + 5,yIn + 0,0x38);
+		drawByte(xIn + 6,yIn + 0,0x10);
+		drawByte(xIn + 7,yIn + 0,0x10);
+		drawByte(xIn + 8,yIn + 0,0x10);
+	};
+	void drawNo( uint8_t xIn, uint8_t yIn )
+	{
+		drawByte(xIn + 0,yIn + 0,0x38);
+		drawByte(xIn + 1,yIn + 0,0x44);
+		drawByte(xIn + 2,yIn + 0,0x8A);
+		drawByte(xIn + 3,yIn + 0,0x92);
+		drawByte(xIn + 4,yIn + 0,0xA2);
+		drawByte(xIn + 5,yIn + 0,0x44);
+		drawByte(xIn + 6,yIn + 0,0x38);
 	};
 };
 

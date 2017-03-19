@@ -8,6 +8,9 @@
 #include <SparkFunTSL2561.h>
 #include <SparkFunBQ27441.h>
 
+#define KValue 16
+
+
 extern OLEDFunctions oled;
 
 // Create an SFE_TSL2561 object, here called "light":
@@ -74,8 +77,6 @@ void LuxPanel::tickStateMachine( int msTicksDelta )
 		drawDisplay = true;
 		oled.clear(PAGE);
 		oled.drawMenu("Photo", isoTable[isoSetting], false, true );
-		oled.batteryStyle1(116, 0, (float)lipo.soc() / 100);
-		//oled.drawBrackets();
 		nextState = PDisplayPhotoValue;
 		break;
 	case PDisplayPhotoValue:
@@ -113,13 +114,16 @@ void LuxPanel::tickStateMachine( int msTicksDelta )
 				good = light.getLux(gain,ms,data0,data1,tempLux);  // True if neither sensor is saturated
 				updateLux( tempLux );
 				//exposure time = stop squared * K / ( ISO * Lux )
-				#define KValue 64
 				float T = pow(fStopTable[fStopSetting],2)*KValue/(lux*(isoTable[isoSetting]));
 				oled.eraseLowerArea();
 				oled.drawLeftBracket(32,10);
 				oled.drawRightBracket(122,10);
 				oled.drawFNumStyle1( fStopTable[fStopSetting], 2, 13 );
 				oled.drawExposureStyle1( T, 60, 14 );
+				if( good == false )
+				{
+					oled.drawNo( 33, 12 );
+				}
 				if( triggerState == hSHeld )
 				{
 					oled.holdStyle1( 100, 10 );
@@ -139,7 +143,6 @@ void LuxPanel::tickStateMachine( int msTicksDelta )
 		drawDisplay = true;
 		oled.clear(PAGE);
 		oled.drawMenu("Video", isoTable[isoSetting], true, true );
-		oled.batteryStyle1(116, 0, (float)lipo.soc() / 100);
 
 		//oled.drawBrackets();
 		nextState = PDisplayVideoValue;
@@ -183,7 +186,6 @@ void LuxPanel::tickStateMachine( int msTicksDelta )
 				good = light.getLux(gain,ms,data0,data1,tempLux);  // True if neither sensor is saturated
 				updateLux( tempLux );
 				//exposure time = stop squared * K / ( ISO * Lux )
-				#define KValue 64
 				//float T = pow(fStopTable[fStopSetting],2)*KValue/(lux*(isoTable[isoSetting]));
 				float N = sqrt((exposureTable[exposureSetting]*lux*isoTable[isoSetting])/KValue);
 				oled.eraseLowerArea();
@@ -191,6 +193,10 @@ void LuxPanel::tickStateMachine( int msTicksDelta )
 				oled.drawRightBracket(122,10);
 				oled.drawExposureStyle2( exposureTable[exposureSetting], 2, 13 );
 				oled.drawFNumStyle2( N, 60, 14 );
+				if( good == false )
+				{
+					oled.drawNo( 33, 12 );
+				}
 				if( triggerState == hSHeld )
 				{
 					oled.holdStyle1( 100, 10 );
@@ -209,7 +215,6 @@ void LuxPanel::tickStateMachine( int msTicksDelta )
 		oled.clear(PAGE);
 		//menu part
 		oled.drawMenu("ISO", true, true );
-		oled.batteryStyle1(116, 0, (float)lipo.soc() / 100);
 
 		//Draw last value
 		oled.drawISOScale( isoSetting );
@@ -260,15 +265,14 @@ void LuxPanel::tickStateMachine( int msTicksDelta )
 		oled.clear(PAGE);
 		//menu part
 		oled.drawMenu("System", true, false );
-		oled.batteryStyle1(116, 0, (float)lipo.soc() / 100);
 
 		//Draw last value
-		oled.setCursor(0,11);
-		oled.print((float)lipo.voltage()/1000, 2);
-		oled.print("mV");
-
 		oled.setCursor(64,11);
-		oled.print((float)lipo.soc()/100, 2);
+		oled.print((float)lipo.voltage()/1000, 2);
+		oled.print("V");
+
+		oled.setCursor(0,20);
+		oled.print((float)lipo.soc(), 0);
 		oled.print("%");
 
 		//Clear wheel state
@@ -279,15 +283,18 @@ void LuxPanel::tickStateMachine( int msTicksDelta )
 		//Draw new value
 		if( lipoGood == true )
 		{
-			oled.setCursor(0,20);
-			oled.print("Sitter OK");
+			oled.setCursor(0,11);
+			oled.print("OK!");
 		}
 		else
 		{
-			oled.setCursor(0,20);
-			oled.print("No sitter");
+			oled.setCursor(0,11);
+			oled.print("NOBATT");
 		}
-		oled.setCursor(0,11);
+		oled.setCursor(64,20);
+		oled.print(lipo.current(AVG));
+		oled.print("mA    ");
+		oled.setCursor(64,11);
 		oled.print((float)lipo.voltage()/1000, 2);
 		if( encButton.serviceRisingEdge() )
 		{
@@ -316,55 +323,35 @@ void LuxPanel::tickStateMachine( int msTicksDelta )
 		}
 		if( upButton.serviceRisingEdge() )
 		{
-			//nextState = PSetFStopInit;
+			nextState = pMaryInit;
 		}
 		break;
-	case PSetFStopInit:
+	case pMaryInit:
 		dataWheel.clearDiff();
+		encButton.serviceRisingEdge();
 		drawDisplay = true;
 		oled.clear(PAGE);
 		//menu part
-		oled.drawMenu("FStop", isoTable[isoSetting], true, true );
+		oled.drawMenu("Mary", true, false );
+		
+		heartCount = 0;
 
-		//Draw last value
-		oled.setCursor(0,11);
-		oled.print(fStopTable[fStopSetting], 2);
-		nextState = PSetFStop;
+		nextState = pMary;
 		break;
-	case PSetFStop:
-		if( dataWheel.serviceChanged() )
+	case pMary:
+		if( encButton.serviceRisingEdge() )
 		{
-			drawDisplay = true;
-			//Erase part
-			oled.setCursor(0,11);
-			oled.print("      ");
-        
-			if( dataWheel.getDiff() > 0 )
+			if( heartCount < 7 )
 			{
-				if( fStopSetting < 23 )
-				{
-					fStopSetting++;
-				}
-				dataWheel.removeDiff(7);
-				
+				oled.drawHeart(heartCount * 18, 12);
+				drawDisplay = true;
+				heartCount++;
 			}
-			if( dataWheel.getDiff() < 0 )
-			{
-				if( fStopSetting > 0 )
-				{
-					fStopSetting--;
-				}
-				dataWheel.removeDiff(7);
-				
-			}
-			//Draw new value
-			oled.setCursor(0,11);
-			oled.print(fStopTable[fStopSetting], 2);
-        
 		}
+		//Draw new value
 		if( downButton.serviceRisingEdge() )
 		{
-			nextState = PSetISOInit;
+			nextState = pSystemInit;
 		}
 		if( upButton.serviceRisingEdge() )
 		{
@@ -375,17 +362,17 @@ void LuxPanel::tickStateMachine( int msTicksDelta )
 		drawDisplay = true;
 		oled.clear(PAGE);
 		//menu part
-		oled.drawMenu("Lux", false, true );
+		oled.drawMenu("Lux", false, false );
 		nextState = PDisplayLuxValue;
 		break;
 	case PDisplayLuxValue:
 		if( downButton.serviceRisingEdge() )
 		{
-			nextState = PSetFStopInit;
+			nextState = pMaryInit;
 		}
 		if( upButton.serviceRisingEdge() )
 		{
-			nextState = PSetExposureInit;
+			//nextState = ;
 		}
 		if (light.getData(data0,data1))
 		{
@@ -393,12 +380,20 @@ void LuxPanel::tickStateMachine( int msTicksDelta )
 			double tempLux;
 			good = light.getLux(gain,ms,data0,data1,tempLux);  // True if neither sensor is saturated
 			updateLux( tempLux );
-			// Print out the results:
 			oled.setCursor(0,11);
+			oled.print(data0);
+			oled.print("   ");
+			oled.setCursor(64,11);
+			oled.print(data1);
+			oled.print("   ");
+
+			// Print out the results:
+			oled.setCursor(0,20);
 			oled.print(" lux: ");
 			oled.print(lux);
-			oled.setCursor(90,11);
-			if (good) oled.print("(good)");	else oled.print("      ");
+			oled.print("   ");
+			oled.setCursor(116,20);
+			if (good) oled.print("  ");	else oled.drawNo(120,20);
 		}
 		else
 		{
@@ -408,57 +403,6 @@ void LuxPanel::tickStateMachine( int msTicksDelta )
 		}
 
 
-		break;
-	case PSetExposureInit:
-		dataWheel.clearDiff();
-		drawDisplay = true;
-		oled.clear(PAGE);
-		//menu part
-		oled.drawMenu("Exp", isoTable[isoSetting], true, false );
-		
-		//Draw last value
-		oled.setCursor(0,11);
-		oled.print("1/");
-		oled.print((int)exposureTable[exposureSetting]);
-		nextState = PSetExposure;
-		break;
-	case PSetExposure:
-		if( dataWheel.serviceChanged() )
-		{
-			drawDisplay = true;
-			//Erase part
-			oled.setCursor(0,11);
-			oled.print("      ");
-        
-			if( dataWheel.getDiff() > 0 )
-			{
-				if( exposureSetting < 11 )
-				{
-					exposureSetting++;
-				}
-				dataWheel.removeDiff(5);
-				
-			}
-			if( dataWheel.getDiff() < 0 )
-			{
-				if( exposureSetting > 0 )
-				{
-					exposureSetting--;
-				}
-				dataWheel.removeDiff(5);
-				
-			}
-			//Draw new value
-			oled.setCursor(0,11);
-			oled.print("1/");
-			oled.print((int)exposureTable[exposureSetting]);
-        
-		}
-		if( downButton.serviceRisingEdge() )
-		{
-			nextState = PDisplayLuxValueInit;
-		}
-		upButton.serviceRisingEdge();
 		break;
 	default:
 		nextState = PInit;
