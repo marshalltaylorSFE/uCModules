@@ -13,20 +13,40 @@ public:
 	virtual void readHardware( void ){};
 	virtual void writeHardware( void ){};
 	void getData( DataObject * inputObject ){
+		Serial.println();
+		Serial.println("getData");
+		Serial.print("Input ");
+		dumpObject(inputObject);
+		Serial.print("Local ");
+		dumpObject(&localData);
 		if( sizeof(*inputObject) == sizeof(localData) )
 		{
 			//memcpy( inputObject, &localData, sizeof(localData) );
-			memcpy( inputObject->data, &localData.data, localData.size );
+			memcpy( inputObject->data, localData.data, localData.size );
 			//inputObject->size = localData.size;
 		}
+		Serial.print("Input ");
+		dumpObject(inputObject);
+		Serial.print("Local ");
+		dumpObject(&localData);
+		Serial.println();
 	};
 	void setData( DataObject * inputObject ){
+		//Serial.println("setData");
+		//Serial.print("Input ");
+		//dumpObject(inputObject);
+		//Serial.print("Local ");
+		//dumpObject(&localData);
 		if( sizeof(*inputObject) == sizeof(localData) )
 		{
 			//memcpy( &localData, inputObject, sizeof(*inputObject) );
-			memcpy( &localData.data, inputObject->data, inputObject->size );
+			memcpy( localData.data, inputObject->data, inputObject->size );
 			//localData.size = inputObject->size;
 		}
+		//Serial.print("Input ");
+		//dumpObject(inputObject);
+		//Serial.print("Local ");
+		//dumpObject(&localData);
 	};
 //protected:
 	GenericHardwareDescription( void ){};

@@ -250,39 +250,35 @@ bool Simple10BitKnob::hasFreshData( void )
 
 void Simple10BitKnob::freshen( uint16_t msTickDelta )
 {
-barfOutStackPointer();
 	//Throw away input
-Serial.println("  A");
 	//Cause the interface to get the data
 	hardwareInterface->readHardware();
-Serial.println("  B");
 	//Collect the data
-	//KnobDataObject tempObject;
-	KnobDataObject * tempObject = new KnobDataObject;
-Serial.print((uint32_t)&(*tempObject), HEX);
-Serial.println("Created");
-	hardwareInterface->getData(tempObject);
-Serial.println("  C");
+	KnobDataObject tempObject;
+//	KnobDataObject * tempObject = new KnobDataObject;
+//		Serial.println("knobFreshen");
+//		Serial.print("Temp ");
+//		dumpObject(tempObject);
+//Serial.print((uint32_t)&(*tempObject), HEX);
+//Serial.println("Created");
+	hardwareInterface->getData(&tempObject);
 	
-	uint16_t tempState = *(uint16_t *)tempObject->data;
+	uint16_t tempState = *(uint16_t *)tempObject.data;
 	int8_t tempSlope = 0;
 	state = tempState;
 	int8_t histDirTemp = 0;
 	if( state > lastState )
 	{
-Serial.println("   A");
 		tempSlope = 1;
 		if( lastSlope == 1 ) histDirTemp = 1;
 	}
 	else if( state < lastState )
 	{
-Serial.println("   B");
 		tempSlope = -1;
 		if( lastSlope == -1 ) histDirTemp = -1;
 	}
 	if( tempSlope != 0 )
 	{
-Serial.println("   C");
 		if( state > lastState + hysteresis || histDirTemp == 1)
 		{
 			newData = 1;
@@ -297,11 +293,12 @@ Serial.println("   C");
 		}
 
 	}
-Serial.print((uint32_t)&(*tempObject), HEX);
-Serial.println("Destroyed");
-	delete tempObject;
+//Serial.print("Temp ");
+//dumpObject(tempObject);
+//Serial.print((uint32_t)&(*tempObject), HEX);
+//Serial.println("Destroyed");
+//	delete tempObject;
 
-Serial.println("  D");
 }
 
 uint16_t Simple10BitKnob::getState( void )

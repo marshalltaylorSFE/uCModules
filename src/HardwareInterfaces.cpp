@@ -1,6 +1,9 @@
 #include "HardwareInterfaces.h"
 #include <Arduino.h>
 
+//Note, the ought to be deconstructed if the hardware interfaces are used
+//dynamically
+
 //Arduino in
 ArduinoDigitalIn::ArduinoDigitalIn( int inputPin )
 {
@@ -36,7 +39,7 @@ ArduinoAnalogIn::ArduinoAnalogIn( int inputPin )
 {
 	pinMode(inputPin, INPUT);
 	localData.size = 2;
-	//localData.data = new uint8_t[localData.size];
+	localData.data = new uint8_t[localData.size];
 	pin = inputPin;
 
 }

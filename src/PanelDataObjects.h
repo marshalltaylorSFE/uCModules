@@ -41,3 +41,5 @@ public:
 
 
 #endif
+
+void dumpObject( DataObject * inputObjectPtr );

@@ -12,27 +12,21 @@ Panel::Panel( void )
 
 void Panel::freshenComponents( uint16_t msTicksDelta )
 {
-Serial.println(" A");
-Serial.println(freeRam());
-barfOutStackPointer();
 	ListObject * tempObject = componentList;
 	if( tempObject == NULL ) return;
 	//Call the static update of PanelComponent
 	//tempObject->PanelComponent->freshenStatic( msTicksDelta );
 	PanelComponent::freshenStatic( msTicksDelta );
 	//call all contained objects' freshen
-Serial.println(" B");
 	while( tempObject != NULL )
 	{
-Serial.println(" C");
-Serial.print("tempObject: ");
+Serial.print("ListObject: ");
 Serial.println((uint32_t)&(*tempObject), HEX);
+Serial.print("ListObject->component: ");
+Serial.println((uint32_t)&(*tempObject->component), HEX);
 		tempObject->component->freshen( msTicksDelta );
-Serial.println(" D");
 		tempObject = tempObject->next;
-Serial.println(" E");
 	}
-Serial.println(" F");
 }
 
 void Panel::add( PanelComponent * inputComp )

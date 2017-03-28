@@ -32,9 +32,7 @@ void SixKnobPanel::reset( void )
 
 void SixKnobPanel::tickStateMachine( int msTicksDelta )
 {
-	Serial.println("A");	
 	freshenComponents( msTicksDelta );
-	Serial.println("B");	
 	//***** PROCESS THE LOGIC *****//
 	//Now do the states.
 	PStates nextState = state;
@@ -63,6 +61,16 @@ void SixKnobPanel::tickStateMachine( int msTicksDelta )
 		//		Serial.print( knob6.getState() );
 		//		Serial.println();
 		//	}
+		if( knob1.serviceChanged() || knob2.serviceChanged() )
+			{
+				//Print stuff
+				Serial.println("*********");
+				Serial.print( knob1.getState() );
+				Serial.print(" ");
+				Serial.print( knob2.getState() );
+				Serial.print(" ");
+				Serial.println();
+			}
 		break;		
 	default:
 		nextState = PInit;
