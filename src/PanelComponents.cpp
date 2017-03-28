@@ -2,6 +2,7 @@
 #include "PanelComponents.h"
 #include "HardwareInterfaces.h"
 #include "Arduino.h"
+extern void barfOutStackPointer();
 
 uint16_t PanelComponent::flasherCounter = 0;
 uint16_t PanelComponent::fastFlasherCounter = 0;
@@ -249,14 +250,17 @@ bool Simple10BitKnob::hasFreshData( void )
 
 void Simple10BitKnob::freshen( uint16_t msTickDelta )
 {
+barfOutStackPointer();
 	//Throw away input
-
+Serial.println("  A");
 	//Cause the interface to get the data
 	hardwareInterface->readHardware();
+Serial.println("  B");
 	
 	//Collect the data
 	KnobDataObject tempObject;
 	hardwareInterface->getData(&tempObject);
+Serial.println("  C");
 	
 	uint16_t tempState = *(uint16_t *)tempObject.data;
 	int8_t tempSlope = 0;
@@ -264,16 +268,19 @@ void Simple10BitKnob::freshen( uint16_t msTickDelta )
 	int8_t histDirTemp = 0;
 	if( state > lastState )
 	{
+Serial.println("   A");
 		tempSlope = 1;
 		if( lastSlope == 1 ) histDirTemp = 1;
 	}
 	else if( state < lastState )
 	{
+Serial.println("   B");
 		tempSlope = -1;
 		if( lastSlope == -1 ) histDirTemp = -1;
 	}
 	if( tempSlope != 0 )
 	{
+Serial.println("   C");
 		if( state > lastState + hysteresis || histDirTemp == 1)
 		{
 			newData = 1;
@@ -288,6 +295,7 @@ void Simple10BitKnob::freshen( uint16_t msTickDelta )
 		}
 
 	}
+Serial.println("  D");
 }
 
 uint16_t Simple10BitKnob::getState( void )
