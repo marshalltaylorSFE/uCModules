@@ -2,59 +2,7 @@
 #define HARDWARE_INTERFACES_H
 
 #include <Arduino.h>
-
-//DataObject is the standard data object as defined by the abstract
-// hardware inteface GenericHardwareDescription
-class DataObject
-{
-public:
-	DataObject( void ){
-		size = -1;
-	};
-	uint8_t * data;
-	int size;
-};
-//Specific types are used to create local instances that construct
-//with the correct size.
-//
-//A few panel components might want the same fingerprint of data.
-//
-//pass references-of to getData and setData
-class ButtonDataObject : public DataObject
-{
-public:
-	ButtonDataObject( void ){
-		size = 1;
-		data = new uint8_t[size];
-	};
-	~ButtonDataObject( void ){
-		delete[] data;
-	}
-};	
-
-class LedDataObject : public DataObject
-{
-public:
-	LedDataObject( void ){
-		size = 1;
-		data = new uint8_t[size];
-	};
-	~LedDataObject( void ){
-		delete[] data;
-	}
-};
-
-class KnobDataObject : public DataObject
-{
-public:
-	KnobDataObject( void ){
-		size = 2;
-		data = new uint8_t[size];
-	};
-	~KnobDataObject( void ){
-		delete[] data;
-	}
-};
+#include <PanelDataObjects.h>
 
 //The abstract class GenericHardwareDescription must be inheireted
 // by the interface to whatever external driver is being used.  Data must be present
@@ -67,13 +15,17 @@ public:
 	void getData( DataObject * inputObject ){
 		if( sizeof(*inputObject) == sizeof(localData) )
 		{
-			memcpy( inputObject, &localData, sizeof(localData) );
+			//memcpy( inputObject, &localData, sizeof(localData) );
+			memcpy( inputObject->data, &localData.data, localData.size );
+			//inputObject->size = localData.size;
 		}
 	};
 	void setData( DataObject * inputObject ){
 		if( sizeof(*inputObject) == sizeof(localData) )
 		{
-			memcpy( &localData, inputObject, sizeof(*inputObject) );
+			//memcpy( &localData, inputObject, sizeof(*inputObject) );
+			memcpy( &localData.data, inputObject->data, inputObject->size );
+			//localData.size = inputObject->size;
 		}
 	};
 //protected:

@@ -7,6 +7,8 @@ uint16_t debugCounter = 0;
 void setup()
 {
 	Serial.begin(115200);
+	delay(2000);
+	Serial.println("OK");
 	barfOutStackPointer();
 	//Go to fresh state
 	myCustomPanel.reset();
@@ -14,7 +16,7 @@ void setup()
 }
 
 //Set LOOP_DELAY to length of time between ticks of everything (in ms)
-#define LOOP_DELAY 10
+#define LOOP_DELAY 400
 
 void loop()
 {
@@ -51,3 +53,9 @@ int freeRam () {
 //  int v;
 //  return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
 }
+
+//void printAddress( void * inputPointer )
+//{
+//	tempAddress = inputPointer*;
+//	Serial.println((uint16_t)
+//}

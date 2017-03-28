@@ -25,6 +25,8 @@ Serial.println(" B");
 	while( tempObject != NULL )
 	{
 Serial.println(" C");
+Serial.print("tempObject: ");
+Serial.println((uint32_t)&(*tempObject), HEX);
 		tempObject->component->freshen( msTicksDelta );
 Serial.println(" D");
 		tempObject = tempObject->next;
@@ -51,7 +53,6 @@ void Panel::add( PanelComponent * inputComp )
 		tempPointer = tempPointer->next;
 		tempPointer->component = inputComp;
 	}
-	
 }
 
 ListObject * Panel::lastComponent( void )

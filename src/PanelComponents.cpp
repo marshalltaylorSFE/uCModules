@@ -256,13 +256,15 @@ Serial.println("  A");
 	//Cause the interface to get the data
 	hardwareInterface->readHardware();
 Serial.println("  B");
-	
 	//Collect the data
-	KnobDataObject tempObject;
-	hardwareInterface->getData(&tempObject);
+	//KnobDataObject tempObject;
+	KnobDataObject * tempObject = new KnobDataObject;
+Serial.print((uint32_t)&(*tempObject), HEX);
+Serial.println("Created");
+	hardwareInterface->getData(tempObject);
 Serial.println("  C");
 	
-	uint16_t tempState = *(uint16_t *)tempObject.data;
+	uint16_t tempState = *(uint16_t *)tempObject->data;
 	int8_t tempSlope = 0;
 	state = tempState;
 	int8_t histDirTemp = 0;
@@ -295,6 +297,10 @@ Serial.println("   C");
 		}
 
 	}
+Serial.print((uint32_t)&(*tempObject), HEX);
+Serial.println("Destroyed");
+	delete tempObject;
+
 Serial.println("  D");
 }
 

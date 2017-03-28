@@ -36,7 +36,7 @@ ArduinoAnalogIn::ArduinoAnalogIn( int inputPin )
 {
 	pinMode(inputPin, INPUT);
 	localData.size = 2;
-	localData.data = new uint8_t[localData.size];
+	//localData.data = new uint8_t[localData.size];
 	pin = inputPin;
 
 }
