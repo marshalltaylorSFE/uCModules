@@ -2,9 +2,6 @@
 #include "HardwareInterfaces.h"
 #include "Arduino.h"
 
-extern int freeRam();
-extern void barfOutStackPointer();
-
 Panel::Panel( void )
 {
 	
@@ -20,10 +17,10 @@ void Panel::freshenComponents( uint16_t msTicksDelta )
 	//call all contained objects' freshen
 	while( tempObject != NULL )
 	{
-Serial.print("ListObject: ");
-Serial.println((uint32_t)&(*tempObject), HEX);
-Serial.print("ListObject->component: ");
-Serial.println((uint32_t)&(*tempObject->component), HEX);
+//Serial.print("ListObject: ");
+//Serial.println((uint32_t)&(*tempObject), HEX);
+//Serial.print("ListObject->component: ");
+//Serial.println((uint32_t)&(*tempObject->component), HEX);
 		tempObject->component->freshen( msTicksDelta );
 		tempObject = tempObject->next;
 	}

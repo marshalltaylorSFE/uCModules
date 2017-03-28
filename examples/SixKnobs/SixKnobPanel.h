@@ -10,7 +10,8 @@
 enum PStates
 {
 	PInit,
-	PRun
+	PRun,
+
 };
 
 class SixKnobPanel : public Panel
