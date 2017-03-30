@@ -22,25 +22,25 @@ Diagrams
 
 ## HardwareInterfaces
 
-<img src="https://raw.githubusercontent.com/marshalltaylorSFE/uCModules/master/extras/ClassDiagramsHardwareDescriptions.jpg" alt="Product" width="80%" height="80%">
+<img src="https://raw.githubusercontent.com/marshalltaylorSFE/uCModules/master/extras/ClassDiagramsHardwareDescriptions.jpg">
 
 *HardwareInterfaces diagram*
 
 ## Panel
 
-<img src="https://raw.githubusercontent.com/marshalltaylorSFE/uCModules/master/extras/ClassDiagramsPanels.jpg" alt="Product" width="80%" height="80%">
+<img src="https://raw.githubusercontent.com/marshalltaylorSFE/uCModules/master/extras/ClassDiagramsPanels.jpg">
 
 *Panel diagram*
 
 ## PanelComponents
 
-<img src="https://raw.githubusercontent.com/marshalltaylorSFE/uCModules/master/extras/ClassDiagramsPanelComponents.jpg" alt="Product" width="80%" height="80%">
+<img src="https://raw.githubusercontent.com/marshalltaylorSFE/uCModules/master/extras/ClassDiagramsPanelComponents.jpg">
 
 *PanelComponents diagram*
 
 ## PanelDataObjects
 
-<img src="https://raw.githubusercontent.com/marshalltaylorSFE/uCModules/master/extras/ClassDiagramsDataObjects.jpg" alt="Product" width="80%" height="80%">
+<img src="https://raw.githubusercontent.com/marshalltaylorSFE/uCModules/master/extras/ClassDiagramsDataObjects.jpg">
 
 *PanelDataObjects diagram*
 
