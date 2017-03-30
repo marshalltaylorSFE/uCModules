@@ -28,7 +28,7 @@ Diagrams
 
 ## Panel
 
-<img src="https://raw.githubusercontent.com/marshalltaylorSFE/uCModules/master/extras/Panels.jpg" alt="Product" width="40%" height="40%">
+<img src="https://raw.githubusercontent.com/marshalltaylorSFE/uCModules/master/extras/ClassDiagramsPanels.jpg" alt="Product" width="40%" height="40%">
 
 *Panel diagram*
 

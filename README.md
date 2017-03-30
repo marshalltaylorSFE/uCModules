@@ -30,7 +30,8 @@ Documentation
 
 Tested on Uno and Teensy 3.x
 
-[PanelComponent information](https://raw.githubusercontent.com/marshalltaylorSFE/uCModules/master/extras/ClassDiagrams.md)
+[PanelComponent information](https://github.com/marshalltaylorSFE/uCModules/blob/master/extras/ClassDiagrams.md)
+
 
 
 Version History
