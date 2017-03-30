@@ -28,7 +28,10 @@ Examples
 Documentation
 --------------
 
-Tested on Uno and Teensy 3.x  Use examples for demonstration.
+Tested on Uno and Teensy 3.x
+
+[PanelComponent information](https://raw.githubusercontent.com/marshalltaylorSFE/uCModules/master/extras/ClassDiagrams.md)
+
 
 Version History
 ---------------

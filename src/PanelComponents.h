@@ -71,7 +71,7 @@ class Led : public PanelComponent
 {
 public:
 	Led( void ) : state(LEDOFF){};
-	void setHardware( GenericHardwareDescription * input, uint8_t invertInput );
+	void setHardware( GenericHardwareDescription * input, bool invertInput );
 	void freshen( uint16_t msTickDelta );
 	
 	ledState_t getState( void );
@@ -79,7 +79,7 @@ public:
 	void toggle( void );
 	
 private:
-	uint8_t invert;
+	bool invert;
 	ledState_t state;
 
 };

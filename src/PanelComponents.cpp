@@ -27,7 +27,7 @@ void PanelComponent::freshenStatic( uint16_t msTickDelta ){
 };
 
 //---Button------------------------------------------------------
-void Button::setHardware( GenericHardwareDescription * input, uint8_t invertInput )
+void Button::setHardware( GenericHardwareDescription * input, bool invertInput )
 {
 	hardwareInterface = input;
 	invert = invertInput;
@@ -59,7 +59,7 @@ void Button::freshen( uint16_t msTickDelta )
 	//{
 	//	return *tempObject.data;
 	//}
-	*tempObject.data ^= invert;  //Do the inversion here
+	*tempObject.data ^= (uint8_t)invert;  //Do the inversion here
 	
 	//Update any time related things
 	buttonDebounceTimeKeeper.mIncrement( msTickDelta );
