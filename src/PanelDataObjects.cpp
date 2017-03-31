@@ -10,18 +10,38 @@ DataObject::DataObject( void )
 ButtonDataObject::ButtonDataObject( void ){
 	size = 1;
 	data = new uint8_t[size];
+Serial.print((uint32_t)&(*this), HEX);
+Serial.print(", +");
+Serial.print(sizeof(data));
+Serial.print("B @");
+Serial.println((uint32_t)&(*data), HEX);
 }
 
 ButtonDataObject::~ButtonDataObject( void ){
+Serial.print((uint32_t)&(*this), HEX);
+Serial.print(", -");
+Serial.print(sizeof(data));
+Serial.print("B @");
+Serial.println((uint32_t)&(*data), HEX);
 	delete[] data;
 }
 
 LedDataObject::LedDataObject( void ){
 	size = 1;
 	data = new uint8_t[size];
+Serial.print((uint32_t)&(*this), HEX);
+Serial.print(", +");
+Serial.print(sizeof(data));
+Serial.print("B @");
+Serial.println((uint32_t)&(*data), HEX);
 }
 
 LedDataObject::~LedDataObject( void ){
+Serial.print((uint32_t)&(*this), HEX);
+Serial.print(", -");
+Serial.print(sizeof(data));
+Serial.print("B @");
+Serial.println((uint32_t)&(*data), HEX);
 	delete[] data;
 }
 
@@ -29,20 +49,20 @@ KnobDataObject::KnobDataObject( void )
 {
 	size = 2;
 	data = new uint8_t[size];
-//Serial.print((uint32_t)&(*this), HEX);
-//Serial.print(", +");
-//Serial.print(sizeof(data));
-//Serial.print("B @");
-//Serial.println((uint32_t)&(*data), HEX);
+Serial.print((uint32_t)&(*this), HEX);
+Serial.print(", +");
+Serial.print(sizeof(data));
+Serial.print("B @");
+Serial.println((uint32_t)&(*data), HEX);
 }
 
 KnobDataObject::~KnobDataObject( void )
 {
-//Serial.print((uint32_t)&(*this), HEX);
-//Serial.print(", -");
-//Serial.print(sizeof(data));
-//Serial.print("B @");
-//Serial.println((uint32_t)&(*data), HEX);
+Serial.print((uint32_t)&(*this), HEX);
+Serial.print(", -");
+Serial.print(sizeof(data));
+Serial.print("B @");
+Serial.println((uint32_t)&(*data), HEX);
 	delete[] data;
 }
 

@@ -159,7 +159,7 @@ uint8_t Button::serviceHoldFallingEdge( void )
 }
 
 //---Led---------------------------------------------------------
-void Led::setHardware( GenericHardwareDescription * input, uint8_t invertInput )
+void Led::setHardware( GenericHardwareDescription * input, bool invertInput )
 {
 	//flasherState = flasherAddress;
 	//fastFlasherState = fastFlasherAddress;

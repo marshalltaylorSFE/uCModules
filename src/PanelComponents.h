@@ -38,7 +38,7 @@ enum buttonState_t
 class Button : public PanelComponent
 {
 public:
-	void setHardware( GenericHardwareDescription * input, uint8_t invertInput );
+	void setHardware( GenericHardwareDescription * input, bool invertInput );
 	bool hasFreshData( void );
 	void freshen( uint16_t msTickDelta );
 	buttonState_t getState( void );
@@ -50,7 +50,7 @@ public:
 private:
 	buttonState_t state;
 	TimeKeeper buttonDebounceTimeKeeper;
-	uint8_t invert;
+	bool invert;
 	uint8_t beingHeld;
 	uint8_t risingEdgeFlag;
 	uint8_t fallingEdgeFlag;
@@ -97,7 +97,7 @@ public:
 private:
 	uint16_t state;
 	uint16_t lastState;
-	const uint8_t hysteresis = 2;
+	const uint8_t hysteresis = 50;
 	int8_t lastSlope = 1;
 	uint8_t newData;
 
