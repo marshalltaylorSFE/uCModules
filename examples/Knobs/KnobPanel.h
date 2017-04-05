@@ -23,7 +23,7 @@ public:
 	
 private:
 	//Internal Panel Components
-	Simple10BitKnob myKnob;
+	Windowed10BitKnob myKnob;
 
 	//State machine stuff  
 	PStates state;

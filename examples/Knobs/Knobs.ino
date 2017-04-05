@@ -16,7 +16,7 @@ void setup()
 }
 
 //Set LOOP_DELAY to length of time between ticks of everything (in ms)
-#define LOOP_DELAY 100
+#define LOOP_DELAY 10
 
 void loop()
 {

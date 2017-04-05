@@ -1,6 +1,8 @@
 #include <Arduino.h>
 #include <PanelDataObjects.h>
 
+//#define ARDUINO_PRINT_DEBUG
+
 DataObject::DataObject( void )
 {
 	size = -1;
@@ -10,38 +12,46 @@ DataObject::DataObject( void )
 ButtonDataObject::ButtonDataObject( void ){
 	size = 1;
 	data = new uint8_t[size];
+#ifdef ARDUINO_PRINT_DEBUG
 Serial.print((uint32_t)&(*this), HEX);
 Serial.print(", +");
 Serial.print(sizeof(data));
 Serial.print("B @");
 Serial.println((uint32_t)&(*data), HEX);
+#endif
 }
 
 ButtonDataObject::~ButtonDataObject( void ){
+#ifdef ARDUINO_PRINT_DEBUG
 Serial.print((uint32_t)&(*this), HEX);
 Serial.print(", -");
 Serial.print(sizeof(data));
 Serial.print("B @");
 Serial.println((uint32_t)&(*data), HEX);
+#endif
 	delete[] data;
 }
 
 LedDataObject::LedDataObject( void ){
 	size = 1;
 	data = new uint8_t[size];
+#ifdef ARDUINO_PRINT_DEBUG
 Serial.print((uint32_t)&(*this), HEX);
 Serial.print(", +");
 Serial.print(sizeof(data));
 Serial.print("B @");
 Serial.println((uint32_t)&(*data), HEX);
+#endif
 }
 
 LedDataObject::~LedDataObject( void ){
+#ifdef ARDUINO_PRINT_DEBUG
 Serial.print((uint32_t)&(*this), HEX);
 Serial.print(", -");
 Serial.print(sizeof(data));
 Serial.print("B @");
 Serial.println((uint32_t)&(*data), HEX);
+#endif
 	delete[] data;
 }
 
@@ -49,20 +59,24 @@ KnobDataObject::KnobDataObject( void )
 {
 	size = 2;
 	data = new uint8_t[size];
+#ifdef ARDUINO_PRINT_DEBUG
 Serial.print((uint32_t)&(*this), HEX);
 Serial.print(", +");
 Serial.print(sizeof(data));
 Serial.print("B @");
 Serial.println((uint32_t)&(*data), HEX);
+#endif
 }
 
 KnobDataObject::~KnobDataObject( void )
 {
+#ifdef ARDUINO_PRINT_DEBUG
 Serial.print((uint32_t)&(*this), HEX);
 Serial.print(", -");
 Serial.print(sizeof(data));
 Serial.print("B @");
 Serial.println((uint32_t)&(*data), HEX);
+#endif
 	delete[] data;
 }
 

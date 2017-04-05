@@ -32,6 +32,7 @@ void KnobPanel::tickStateMachine( int msTicksDelta )
 	case PRun:
 		if( myKnob.serviceChanged() )
 		{
+			Serial.print("knob: ");
 			Serial.println(myKnob.getState());
 		}
 		break;
