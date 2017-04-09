@@ -370,10 +370,8 @@ uint8_t Simple10BitKnob::serviceChanged( void )
 }
 
 //---Hysteresis10BitKnob--------------------------------------------------------
-Hysteresis10BitKnob::Hysteresis10BitKnob( void )
+Hysteresis10BitKnob::Hysteresis10BitKnob( void ) : values(16), averages(16)
 {
-	values.allocateDepth(16);
-	averages.allocateDepth(16);
 	newData = 0;
 }
 
@@ -394,8 +392,6 @@ bool Hysteresis10BitKnob::hasFreshData( void )
 
 void Hysteresis10BitKnob::freshen( uint16_t msTickDelta )
 {
-	if(averages.bufferInitalized == 0)return;
-	if(values.bufferInitalized == 0)return;
 	//Throw away input
 	//Cause the interface to get the data
 	hardwareInterface->readHardware();
@@ -559,10 +555,8 @@ void Hysteresis10BitKnob::setSamplesAveraged( uint8_t input )
 }
 
 //---Windowed10BitKnob--------------------------------------------------------
-Windowed10BitKnob::Windowed10BitKnob( void )
+Windowed10BitKnob::Windowed10BitKnob( void ) : values(16), averages(16)
 {
-	values.allocateDepth(16);
-	averages.allocateDepth(16);
 	newData = 0;
 }
 
@@ -583,8 +577,6 @@ bool Windowed10BitKnob::hasFreshData( void )
 
 void Windowed10BitKnob::freshen( uint16_t msTickDelta )
 {
-	if(averages.bufferInitalized == 0)return;
-	if(values.bufferInitalized == 0)return;
 	//Throw away input
 	//Cause the interface to get the data
 	hardwareInterface->readHardware();
@@ -721,7 +713,7 @@ void Windowed10BitKnob::setSamplesAveraged( uint8_t input )
 	samplesAveraged = input;
 }
 
-void Windowed10BitKnob::setWindow( uint8_t input )
+void Windowed10BitKnob::setWindow( int16_t input )
 {
 	window = input;
 }

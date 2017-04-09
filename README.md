@@ -15,7 +15,8 @@ Examples
 
 * Panel Components:
   * **ButtonBlinker** - Demonstration of 1 button and 1 led, with state machine. (Panel class)
-  * **Knobs** - Demonstration of 1 knob
+  * **Knob** - Demonstration of 1 knob
+  * **SixKnobs** - Knobs 2 and 3 set window size, samples to average.  Shows off "Windowed10BitKnob"
 * Utilities:
   * **flagMessagingNested** - Shows how to use the flagMessaging to communicate between classes.  Grounding pin 7 flags an inner class with a MessagingFlag object, which then changes state and communicates back to the outer class through another MessagingFlag object.
   * **timerModule32Example** - Example XORing 3 timers on the LED pin using uS counts with 32 bit counters
@@ -31,7 +32,6 @@ Documentation
 Tested on Uno and Teensy 3.x
 
 [PanelComponent information](https://github.com/marshalltaylorSFE/uCModules/blob/master/extras/ClassDiagrams.md)
-
 
 
 Version History

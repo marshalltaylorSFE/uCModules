@@ -1,0 +1,26 @@
+# depslib dependency file v1.0
+1491765813 source:e:\arduinoconfigurations\arduino-1.8.1_stock_teensy\sketches\libraries\ucmodules\extras\cpp_test_code\circularbufferproject\file.cpp
+	"file.h"
+	"CircularBuffer.h"
+
+1491765877 e:\arduinoconfigurations\arduino-1.8.1_stock_teensy\sketches\libraries\ucmodules\extras\cpp_test_code\circularbufferproject\file.h
+	<CircularBuffer.h>
+
+1491765121 source:e:\arduinoconfigurations\arduino-1.8.1_stock_teensy\sketches\libraries\ucmodules\src\circularbuffer.cpp
+	"CircularBuffer.h"
+	<Arduino.h>
+
+1491765792 e:\arduinoconfigurations\arduino-1.8.1_stock_teensy\sketches\libraries\ucmodules\src\circularbuffer.h
+	"stdint.h"
+
+1491765792 source:e:\arduinoconfigurations\arduino-1.8.1_stock_teensy\sketches\libraries\ucmodules\src\circularbuffer.h
+	"stdint.h"
+
+1491765877 source:e:\arduinoconfigurations\arduino-1.8.1_stock_teensy\sketches\libraries\ucmodules\extras\cpp_test_code\circularbufferproject\file.h
+	<CircularBuffer.h>
+
+1491765886 source:e:\arduinoconfigurations\arduino-1.8.1_stock_teensy\sketches\libraries\ucmodules\extras\cpp_test_code\circularbufferproject\main.cpp
+	"file.h"
+	"stdio.h"
+	"CircularBuffer.h"
+

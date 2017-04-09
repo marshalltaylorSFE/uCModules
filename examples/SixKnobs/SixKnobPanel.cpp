@@ -42,10 +42,63 @@ void SixKnobPanel::tickStateMachine( int msTicksDelta )
 		Serial.println("Init state");
 		break;
 	case PRun:
-		//Serial.println(knob1.serviceChanged());
 		if( knob1.serviceChanged() || knob2.serviceChanged() || knob3.serviceChanged()
 			|| knob4.serviceChanged() || knob5.serviceChanged() || knob6.serviceChanged() )
 			{
+				bool flagPrint = false;
+				//Print knobs
+				Serial.print("Knob: ");
+				if( knob1.serviceChanged() )
+				{
+					Serial.print("1");
+				}
+				else Serial.print(" ");
+				if( knob2.serviceChanged() )
+				{
+					flagPrint = true;
+					windowDebugVar = knob2.getState();
+					knob1.setWindow( windowDebugVar );
+					knob2.setWindow( windowDebugVar );
+					knob3.setWindow( windowDebugVar );
+					knob4.setWindow( windowDebugVar );
+					knob5.setWindow( windowDebugVar );
+					knob6.setWindow( windowDebugVar );
+
+					Serial.print("2");
+				}
+				else Serial.print(" ");
+				if( knob3.serviceChanged() )
+				{
+					flagPrint = true;
+					averagedDebugVar = 1 + knob3.getState() / 64;
+					knob1.setSamplesAveraged( averagedDebugVar );
+					knob2.setSamplesAveraged( averagedDebugVar );
+					knob3.setSamplesAveraged( averagedDebugVar );
+					knob4.setSamplesAveraged( averagedDebugVar );
+					knob5.setSamplesAveraged( averagedDebugVar );
+					knob6.setSamplesAveraged( averagedDebugVar );
+
+					Serial.print("3");
+				}
+				else Serial.print(" ");
+				if( knob4.serviceChanged() )
+				{
+					Serial.print("4");
+				}
+				else Serial.print(" ");
+				if( knob5.serviceChanged() )
+				{
+					Serial.print("5");
+				}
+				else Serial.print(" ");
+				if( knob6.serviceChanged() )
+				{
+					Serial.print("6");
+				}
+				else Serial.print(" ");
+				
+				Serial.print(" ");
+				
 				//Print stuff
 				Serial.print( knob1.getState() );
 				Serial.print(" ");
@@ -58,9 +111,18 @@ void SixKnobPanel::tickStateMachine( int msTicksDelta )
 				Serial.print( knob5.getState() );
 				Serial.print(" ");
 				Serial.print( knob6.getState() );
+				
+				if(flagPrint)
+				{
+					Serial.print("  ");
+					Serial.print( averagedDebugVar );
+					Serial.print(" ave'd, window = ");
+					Serial.print( windowDebugVar ); 
+				}
 				Serial.println();
+				
 			}
-		break;		
+		break;
 	default:
 		nextState = PInit;
 		break;

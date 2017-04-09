@@ -26,15 +26,18 @@ public:
 	
 private:
 	//Internal Panel Components
-	Simple10BitKnob knob1;
-	Simple10BitKnob knob2;
-	Simple10BitKnob knob3;
-	Simple10BitKnob knob4;
-	Simple10BitKnob knob5;
-	Simple10BitKnob knob6;
+	Windowed10BitKnob knob1;
+	Windowed10BitKnob knob2;
+	Windowed10BitKnob knob3;
+	Windowed10BitKnob knob4;
+	Windowed10BitKnob knob5;
+	Windowed10BitKnob knob6;
 
 	//State machine stuff  
 	PStates state;
+	
+	uint16_t windowDebugVar;
+	uint16_t averagedDebugVar;
 
 };
 

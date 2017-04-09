@@ -150,8 +150,8 @@ private:
 	int8_t lastSlope = 1;
 	uint8_t newData;
 	uint8_t samplesAveraged = 7;
-	CircularBuffer values;
-	CircularBuffer averages;
+	CircularBuffer <uint16_t> values;
+	CircularBuffer <uint16_t> averages;
 	uint16_t lowerKnobVal = 0;
 	uint16_t upperKnobVal = 1023;
 	float lowerFloatVal = -1.0;
@@ -186,19 +186,19 @@ public:
 	void setUpperIntVal( int16_t input );
 	void setLowerUIntVal( uint16_t input );
 	void setUpperUIntVal( uint16_t input );
-	void setWindow( uint8_t input );
+	void setWindow( int16_t input );
 	void setSamplesAveraged( uint8_t input );
 private:
 	void moveWindowUpper( uint16_t input );
 	void moveWindowLower( uint16_t input );
 	int16_t windowUpper = 60;
 	int16_t windowLower = 40;
-	uint8_t window = 50;
+	int16_t window = 50;
 	int8_t lastSlope = 1;
 	uint8_t newData;
 	uint8_t samplesAveraged = 6;
-	CircularBuffer values;
-	CircularBuffer averages;
+	CircularBuffer <uint16_t> values;
+	CircularBuffer <uint16_t> averages;
 	uint16_t lowerKnobVal = 0;
 	uint16_t upperKnobVal = 1023;
 	float lowerFloatVal = -1.0;
