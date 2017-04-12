@@ -42,8 +42,8 @@ void SixKnobPanel::tickStateMachine( int msTicksDelta )
 		Serial.println("Init state");
 		break;
 	case PRun:
-		if( knob1.serviceChanged() || knob2.serviceChanged() || knob3.serviceChanged()
-			|| knob4.serviceChanged() || knob5.serviceChanged() || knob6.serviceChanged() )
+		if( knob1.hasFreshData() || knob2.hasFreshData() || knob3.hasFreshData()
+			|| knob4.hasFreshData() || knob5.hasFreshData() || knob6.hasFreshData() )
 			{
 				bool flagPrint = false;
 				//Print knobs
@@ -61,8 +61,8 @@ void SixKnobPanel::tickStateMachine( int msTicksDelta )
 					knob2.setWindow( windowDebugVar );
 					knob3.setWindow( windowDebugVar );
 					knob4.setWindow( windowDebugVar );
-					knob5.setWindow( windowDebugVar );
-					knob6.setWindow( windowDebugVar );
+					//knob5.setWindow( windowDebugVar );
+					//knob6.setWindow( windowDebugVar );
 
 					Serial.print("2");
 				}
@@ -75,8 +75,8 @@ void SixKnobPanel::tickStateMachine( int msTicksDelta )
 					knob2.setSamplesAveraged( averagedDebugVar );
 					knob3.setSamplesAveraged( averagedDebugVar );
 					knob4.setSamplesAveraged( averagedDebugVar );
-					knob5.setSamplesAveraged( averagedDebugVar );
-					knob6.setSamplesAveraged( averagedDebugVar );
+					//knob5.setSamplesAveraged( averagedDebugVar );
+					//knob6.setSamplesAveraged( averagedDebugVar );
 
 					Serial.print("3");
 				}

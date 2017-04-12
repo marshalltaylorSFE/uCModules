@@ -85,52 +85,58 @@ private:
 
 };
 
-//---Knob--------------------------------------------------------
-class Knob : public PanelComponent
+//---KnobParentClass---------------------------------------------
+class KnobParentClass : public PanelComponent
 {
 public:
-	Knob( void );
-	void setHardware( GenericHardwareDescription * input );
-	bool hasFreshData( void );
-	void freshen( uint16_t msTickDelta );
-	uint16_t getState( void );
-	uint8_t serviceChanged( void );
+	KnobParentClass( void );
+	virtual void setHardware( GenericHardwareDescription * input );
+	virtual bool hasFreshData( void );
+	virtual void freshen( uint16_t msTickDelta ){}; //Wish this was pure virtual...
+	virtual bool serviceChanged( void );
 private:
-	uint16_t state;
-	uint16_t lastState;
-	uint8_t newData;
+protected:
+	bool newData;
 
 };
+
+//---Simple8BitKnob----------------------------------------------
+class Simple8BitKnob : public KnobParentClass
+{
+public:
+	Simple8BitKnob( void ){};
+	virtual void freshen( uint16_t msTickDelta );
+	uint8_t getState( void );
+private:
+	uint8_t state;
+	uint8_t lastState;
+
+};
+
 
 //---Simple10BitKnob---------------------------------------------
-class Simple10BitKnob : public PanelComponent
+class Simple10BitKnob : public KnobParentClass
 {
 public:
-	Simple10BitKnob( void );
-	void setHardware( GenericHardwareDescription * input );
-	bool hasFreshData( void );
-	void freshen( uint16_t msTickDelta );
+	Simple10BitKnob( void ){};
+	virtual void freshen( uint16_t msTickDelta );
+	void setHysteresis( uint8_t );
 	uint16_t getState( void );
-	uint8_t serviceChanged( void );
-private:
+protected:
 	uint16_t state;
 	uint16_t lastState;
-	const uint8_t hysteresis = 2;
+	uint8_t hysteresis = 2;
 	int8_t lastSlope = 1;
-	uint8_t newData;
 
 };
 
-//---Hysteresis10BitKnob---------------------------------------------
-class Hysteresis10BitKnob : public PanelComponent
+//---Complex10BitKnob--------------------------------------------
+class Complex10BitKnob : public KnobParentClass
 {
 public:
-	Hysteresis10BitKnob( void );
-	void setHardware( GenericHardwareDescription * input );
-	bool hasFreshData( void );
-	void freshen( uint16_t msTickDelta );
+	Complex10BitKnob( void ){};
+	virtual void freshen( uint16_t msTickDelta );
 	uint16_t getState( void );
-	uint8_t serviceChanged( void );
 	uint8_t getAsUInt8( void );
 	int16_t getAsInt16( void );
 	uint16_t getAsUInt16( void );
@@ -143,15 +149,7 @@ public:
 	void setUpperIntVal( int16_t input );
 	void setLowerUIntVal( uint16_t input );
 	void setUpperUIntVal( uint16_t input );
-	void setHysteresis( uint8_t input );
-	void setSamplesAveraged( uint8_t input );
-private:
-	uint8_t hysteresis = 20;
-	int8_t lastSlope = 1;
-	uint8_t newData;
-	uint8_t samplesAveraged = 7;
-	CircularBuffer <uint16_t> values;
-	CircularBuffer <uint16_t> averages;
+protected:
 	uint16_t lowerKnobVal = 0;
 	uint16_t upperKnobVal = 1023;
 	float lowerFloatVal = -1.0;
@@ -161,52 +159,42 @@ private:
 	uint16_t lowerUIntVal = 0;
 	uint16_t upperUIntVal = 65535;
 	int32_t currentValue = 0;
+};
+
+//---Hysteresis10BitKnob---------------------------------------------
+class Hysteresis10BitKnob : public Complex10BitKnob
+{
+public:
+	Hysteresis10BitKnob( void );
+	virtual void freshen( uint16_t msTickDelta );
+	void setHysteresis( uint8_t input );
+	void setSamplesAveraged( uint8_t input );
+protected:
+	uint8_t hysteresis = 20;
+	int8_t lastSlope = 1;
+	uint8_t samplesAveraged = 7;
+	CircularBuffer <uint16_t> values;
+	CircularBuffer <uint16_t> averages;
 	uint8_t hystState = 0; //can be 0 for lower or 1 for output (think positive feedback)
 };
 
 //---Windowed10BitKnob---------------------------------------------
-class Windowed10BitKnob : public PanelComponent
+class Windowed10BitKnob : public Complex10BitKnob
 {
 public:
 	Windowed10BitKnob( void );
-	void setHardware( GenericHardwareDescription * input );
-	bool hasFreshData( void );
-	void freshen( uint16_t msTickDelta );
-	uint16_t getState( void );
-	uint8_t serviceChanged( void );
-	uint8_t getAsUInt8( void );
-	int16_t getAsInt16( void );
-	uint16_t getAsUInt16( void );
-	float getAsFloat( void );
-	void setLowerKnobVal( uint16_t input );
-	void setUpperKnobVal( uint16_t input );
-	void setLowerFloatVal( float input );
-	void setUpperFloatVal( float input );
-	void setLowerIntVal( int16_t input );
-	void setUpperIntVal( int16_t input );
-	void setLowerUIntVal( uint16_t input );
-	void setUpperUIntVal( uint16_t input );
+	virtual void freshen( uint16_t msTickDelta );
 	void setWindow( int16_t input );
 	void setSamplesAveraged( uint8_t input );
-private:
+protected:
 	void moveWindowUpper( uint16_t input );
 	void moveWindowLower( uint16_t input );
 	int16_t windowUpper = 60;
 	int16_t windowLower = 40;
 	int16_t window = 50;
 	int8_t lastSlope = 1;
-	uint8_t newData;
 	uint8_t samplesAveraged = 6;
 	CircularBuffer <uint16_t> values;
 	CircularBuffer <uint16_t> averages;
-	uint16_t lowerKnobVal = 0;
-	uint16_t upperKnobVal = 1023;
-	float lowerFloatVal = -1.0;
-	float upperFloatVal = 1.0;
-	int16_t lowerIntVal = -32768;
-	int16_t upperIntVal = 32767;
-	uint16_t lowerUIntVal = 0;
-	uint16_t upperUIntVal = 65535;
-	int32_t currentValue = 0;
 };
 #endif

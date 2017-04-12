@@ -30,8 +30,8 @@ private:
 	Windowed10BitKnob knob2;
 	Windowed10BitKnob knob3;
 	Windowed10BitKnob knob4;
-	Windowed10BitKnob knob5;
-	Windowed10BitKnob knob6;
+	Simple10BitKnob knob5;
+	Simple8BitKnob knob6;
 
 	//State machine stuff  
 	PStates state;

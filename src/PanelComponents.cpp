@@ -227,31 +227,47 @@ void Led::toggle( void )
 	}
 }
 
-
-//---Knob--------------------------------------------------------
-//This knob does no hysteresis
-Knob::Knob( void )
+//---KnobParentClass--------------------------------------------------------
+KnobParentClass::KnobParentClass( void )
 {
 	newData = 0;
-	lastState = 0;
 }
 
-void Knob::setHardware( GenericHardwareDescription * input )
+void KnobParentClass::setHardware( GenericHardwareDescription * input )
 {
 	hardwareInterface = input;
 }
 
-bool Knob::hasFreshData( void )
+bool KnobParentClass::hasFreshData( void )
 {
-	uint8_t returnVar = 0;
 	if( newData )
 	{
-		returnVar = 1;
+		return 1;
 	}
-	return returnVar;
+	else
+	{
+		return 0;
+	}
+	
 }
 
-void Knob::freshen( uint16_t msTickDelta )
+bool KnobParentClass::serviceChanged( void )
+{
+	if( newData )
+	{
+		newData = false;
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+
+}
+
+
+//---Simple8BitKnob---------------------------------------------------------
+void Simple8BitKnob::freshen( uint16_t msTickDelta )
 {
 	//Throw away input
 	//Cause the interface to get the data
@@ -260,7 +276,7 @@ void Knob::freshen( uint16_t msTickDelta )
 	KnobDataObject tempObject;
 	hardwareInterface->getData(&tempObject);
 	
-	state = *(uint16_t *)tempObject.data;
+	state = *(uint16_t *)tempObject.data >> 2;
 	if( state != lastState )
 	{
 		newData = 1;
@@ -269,42 +285,12 @@ void Knob::freshen( uint16_t msTickDelta )
 
 }
 
-uint16_t Knob::getState( void )
+uint8_t Simple8BitKnob::getState( void )
 {
-  newData = 0;
-
-  return state;
+   return state;
 }
-
-uint8_t Knob::serviceChanged( void )
-{
-	return newData;
-}
-
 
 //---Simple10BitKnob--------------------------------------------------------
-//Kind of a mysterious throwback...
-Simple10BitKnob::Simple10BitKnob( void )
-{
-	newData = 0;
-	lastState = 0;
-}
-
-void Simple10BitKnob::setHardware( GenericHardwareDescription * input )
-{
-	hardwareInterface = input;
-}
-
-bool Simple10BitKnob::hasFreshData( void )
-{
-	uint8_t returnVar = 0;
-	if( newData )
-	{
-		returnVar = 1;
-	}
-	return returnVar;
-}
-
 void Simple10BitKnob::freshen( uint16_t msTickDelta )
 {
 	//Throw away input
@@ -319,7 +305,7 @@ void Simple10BitKnob::freshen( uint16_t msTickDelta )
 //Serial.println("Created");
 	hardwareInterface->getData(&tempObject);
 	
-	uint16_t tempState = *(uint16_t *)tempObject.data;
+	int16_t tempState = *(uint16_t *)tempObject.data;
 	int8_t tempSlope = 0;
 	state = tempState;
 	int8_t histDirTemp = 0;
@@ -335,13 +321,13 @@ void Simple10BitKnob::freshen( uint16_t msTickDelta )
 	}
 	if( tempSlope != 0 )
 	{
-		if( state > lastState + hysteresis || histDirTemp == 1)
+		if( state > (uint32_t)lastState + hysteresis || histDirTemp == 1)
 		{
 			newData = 1;
 			lastState = state;
 			lastSlope = tempSlope;
 		}
-		if( state < lastState - hysteresis || histDirTemp == -1 )
+		if( state < (uint32_t)lastState - hysteresis || histDirTemp == -1 )
 		{
 			newData = 1;
 			lastState = state;
@@ -357,39 +343,129 @@ void Simple10BitKnob::freshen( uint16_t msTickDelta )
 
 }
 
+void Simple10BitKnob::setHysteresis( uint8_t input )
+{
+	hysteresis = input;
+}
+
 uint16_t Simple10BitKnob::getState( void )
 {
-  newData = 0;
-
   return state;
 }
 
-uint8_t Simple10BitKnob::serviceChanged( void )
+//---Complex10BitKnob--------------------------------------------
+void Complex10BitKnob::freshen( uint16_t msTickDelta )
 {
-	return newData;
+	//Throw away input
+	//Cause the interface to get the data
+	hardwareInterface->readHardware();
+	//Collect the data
+	KnobDataObject tempObject;
+	hardwareInterface->getData(&tempObject);
+	
+//		Serial.println("knobFreshen");
+//		Serial.print("Temp ");
+//		dumpObject(&tempObject);
+
+	uint16_t tempState = *(uint16_t *)tempObject.data;
+	//Read the knob value into the buffer
+	//Serial.println(tempState);
+
+	currentValue = tempState;
+}
+
+uint16_t Complex10BitKnob::getState( void )
+{
+  return (uint16_t)currentValue;
+}
+
+uint8_t Complex10BitKnob::getAsUInt8( void )
+{
+	newData = 0;
+	return currentValue >> 2;
+}
+int16_t Complex10BitKnob::getAsInt16( void )
+{
+	uint32_t tempValue = currentValue;
+	if( tempValue < lowerKnobVal ) tempValue = lowerKnobVal;
+	if( tempValue > upperKnobVal ) tempValue = upperKnobVal;
+	// now find scalar from 0 to 1
+	float inputPercent = ((float)(tempValue - lowerKnobVal))/(float)(upperKnobVal - lowerKnobVal);
+	float outputRange = upperIntVal - lowerIntVal;
+	newData = 0;
+	return lowerIntVal + (inputPercent * outputRange);
+}
+uint16_t Complex10BitKnob::getAsUInt16( void )
+{
+	uint32_t tempValue = currentValue;
+	if( tempValue < lowerKnobVal ) tempValue = lowerKnobVal;
+	if( tempValue > upperKnobVal ) tempValue = upperKnobVal;
+	// now find scalar from 0 to 1
+	float inputPercent = ((float)(tempValue - lowerKnobVal))/(float)(upperKnobVal - lowerKnobVal);
+	float outputRange = upperUIntVal - lowerUIntVal;
+	newData = 0;
+	return lowerUIntVal + (inputPercent * outputRange);
+}
+float Complex10BitKnob::getAsFloat( void )
+{
+	uint32_t tempValue = currentValue;
+	if( tempValue < lowerKnobVal ) tempValue = lowerKnobVal;
+	if( tempValue > upperKnobVal ) tempValue = upperKnobVal;
+	// now find scalar from 0 to 1
+	float inputPercent = ((float)(tempValue - lowerKnobVal))/(float)(upperKnobVal - lowerKnobVal);
+	float outputRange = upperFloatVal - lowerFloatVal;
+	newData = 0;
+	return lowerFloatVal + (inputPercent * outputRange);
+}
+
+void Complex10BitKnob::setLowerKnobVal( uint16_t input )
+{
+	if( input < 0 )input = 0;
+	if( input > 1023 )input = 1023;
+	lowerKnobVal = input;
+}
+
+void Complex10BitKnob::setUpperKnobVal( uint16_t input )
+{
+	if( input < 0 )input = 0;
+	if( input > 1023 )input = 1023;
+	upperKnobVal = input;
+}
+
+void Complex10BitKnob::setLowerFloatVal( float input )
+{
+	lowerFloatVal = input;
+}
+
+void Complex10BitKnob::setUpperFloatVal( float input )
+{
+	upperFloatVal = input;
+}
+
+void Complex10BitKnob::setLowerIntVal( int16_t input )
+{
+	lowerIntVal = input;
+}
+
+void Complex10BitKnob::setUpperIntVal( int16_t input )
+{
+	upperIntVal = input;
+}
+
+void Complex10BitKnob::setLowerUIntVal( uint16_t input )
+{
+	lowerUIntVal = input;
+}
+
+void Complex10BitKnob::setUpperUIntVal( uint16_t input )
+{
+	upperUIntVal = input;
 }
 
 //---Hysteresis10BitKnob--------------------------------------------------------
 Hysteresis10BitKnob::Hysteresis10BitKnob( void ) : values(16), averages(16)
 {
-	newData = 0;
 }
-
-void Hysteresis10BitKnob::setHardware( GenericHardwareDescription * input )
-{
-	hardwareInterface = input;
-}
-
-bool Hysteresis10BitKnob::hasFreshData( void )
-{
-	uint8_t returnVar = 0;
-	if( newData )
-	{
-		returnVar = 1;
-	}
-	return returnVar;
-}
-
 void Hysteresis10BitKnob::freshen( uint16_t msTickDelta )
 {
 	//Throw away input
@@ -449,101 +525,6 @@ void Hysteresis10BitKnob::freshen( uint16_t msTickDelta )
 
 }
 
-uint16_t Hysteresis10BitKnob::getState( void )
-{
-  newData = 0;
-
-  return (uint16_t)currentValue;
-}
-
-uint8_t Hysteresis10BitKnob::serviceChanged( void )
-{
-	return newData;
-}
-
-uint8_t Hysteresis10BitKnob::getAsUInt8( void )
-{
-	newData = 0;
-	return currentValue >> 2;
-}
-int16_t Hysteresis10BitKnob::getAsInt16( void )
-{
-	uint32_t tempValue = currentValue;
-	if( tempValue < lowerKnobVal ) tempValue = lowerKnobVal;
-	if( tempValue > upperKnobVal ) tempValue = upperKnobVal;
-	// now find scalar from 0 to 1
-	float inputPercent = ((float)(tempValue - lowerKnobVal))/(float)(upperKnobVal - lowerKnobVal);
-	float outputRange = upperIntVal - lowerIntVal;
-	newData = 0;
-	return lowerIntVal + (inputPercent * outputRange);
-}
-uint16_t Hysteresis10BitKnob::getAsUInt16( void )
-{
-	uint32_t tempValue = currentValue;
-	if( tempValue < lowerKnobVal ) tempValue = lowerKnobVal;
-	if( tempValue > upperKnobVal ) tempValue = upperKnobVal;
-	// now find scalar from 0 to 1
-	float inputPercent = ((float)(tempValue - lowerKnobVal))/(float)(upperKnobVal - lowerKnobVal);
-	float outputRange = upperUIntVal - lowerUIntVal;
-	newData = 0;
-	return lowerUIntVal + (inputPercent * outputRange);
-}
-float Hysteresis10BitKnob::getAsFloat( void )
-{
-	uint32_t tempValue = currentValue;
-	if( tempValue < lowerKnobVal ) tempValue = lowerKnobVal;
-	if( tempValue > upperKnobVal ) tempValue = upperKnobVal;
-	// now find scalar from 0 to 1
-	float inputPercent = ((float)(tempValue - lowerKnobVal))/(float)(upperKnobVal - lowerKnobVal);
-	float outputRange = upperFloatVal - lowerFloatVal;
-	newData = 0;
-	return lowerFloatVal + (inputPercent * outputRange);
-}
-
-void Hysteresis10BitKnob::setLowerKnobVal( uint16_t input )
-{
-	if( input < 0 )input = 0;
-	if( input > 1023 )input = 1023;
-	lowerKnobVal = input;
-}
-
-void Hysteresis10BitKnob::setUpperKnobVal( uint16_t input )
-{
-	if( input < 0 )input = 0;
-	if( input > 1023 )input = 1023;
-	upperKnobVal = input;
-}
-
-void Hysteresis10BitKnob::setLowerFloatVal( float input )
-{
-	lowerFloatVal = input;
-}
-
-void Hysteresis10BitKnob::setUpperFloatVal( float input )
-{
-	upperFloatVal = input;
-}
-
-void Hysteresis10BitKnob::setLowerIntVal( int16_t input )
-{
-	lowerIntVal = input;
-}
-
-void Hysteresis10BitKnob::setUpperIntVal( int16_t input )
-{
-	upperIntVal = input;
-}
-
-void Hysteresis10BitKnob::setLowerUIntVal( uint16_t input )
-{
-	lowerUIntVal = input;
-}
-
-void Hysteresis10BitKnob::setUpperUIntVal( uint16_t input )
-{
-	upperUIntVal = input;
-}
-
 void Hysteresis10BitKnob::setHysteresis( uint8_t input )
 {
 	hysteresis = input;
@@ -557,22 +538,6 @@ void Hysteresis10BitKnob::setSamplesAveraged( uint8_t input )
 //---Windowed10BitKnob--------------------------------------------------------
 Windowed10BitKnob::Windowed10BitKnob( void ) : values(16), averages(16)
 {
-	newData = 0;
-}
-
-void Windowed10BitKnob::setHardware( GenericHardwareDescription * input )
-{
-	hardwareInterface = input;
-}
-
-bool Windowed10BitKnob::hasFreshData( void )
-{
-	uint8_t returnVar = 0;
-	if( newData )
-	{
-		returnVar = 1;
-	}
-	return returnVar;
 }
 
 void Windowed10BitKnob::freshen( uint16_t msTickDelta )
@@ -611,101 +576,6 @@ void Windowed10BitKnob::freshen( uint16_t msTickDelta )
 	uint32_t temp = windowLower + (window >> 1);
 	//scale it
 	currentValue = ((temp - (window >> 1)) << 10 ) / (1024 - window );
-}
-
-uint16_t Windowed10BitKnob::getState( void )
-{
-  newData = 0;
-
-  return (uint16_t)currentValue;
-}
-
-uint8_t Windowed10BitKnob::serviceChanged( void )
-{
-	return newData;
-}
-
-uint8_t Windowed10BitKnob::getAsUInt8( void )
-{
-	newData = 0;
-	return currentValue >> 2;
-}
-int16_t Windowed10BitKnob::getAsInt16( void )
-{
-	uint32_t tempValue = currentValue;
-	if( tempValue < lowerKnobVal ) tempValue = lowerKnobVal;
-	if( tempValue > upperKnobVal ) tempValue = upperKnobVal;
-	// now find scalar from 0 to 1
-	float inputPercent = ((float)(tempValue - lowerKnobVal))/(float)(upperKnobVal - lowerKnobVal);
-	float outputRange = upperIntVal - lowerIntVal;
-	newData = 0;
-	return lowerIntVal + (inputPercent * outputRange);
-}
-uint16_t Windowed10BitKnob::getAsUInt16( void )
-{
-	uint32_t tempValue = currentValue;
-	if( tempValue < lowerKnobVal ) tempValue = lowerKnobVal;
-	if( tempValue > upperKnobVal ) tempValue = upperKnobVal;
-	// now find scalar from 0 to 1
-	float inputPercent = ((float)(tempValue - lowerKnobVal))/(float)(upperKnobVal - lowerKnobVal);
-	float outputRange = upperUIntVal - lowerUIntVal;
-	newData = 0;
-	return lowerUIntVal + (inputPercent * outputRange);
-}
-float Windowed10BitKnob::getAsFloat( void )
-{
-	uint32_t tempValue = currentValue;
-	if( tempValue < lowerKnobVal ) tempValue = lowerKnobVal;
-	if( tempValue > upperKnobVal ) tempValue = upperKnobVal;
-	// now find scalar from 0 to 1
-	float inputPercent = ((float)(tempValue - lowerKnobVal))/(float)(upperKnobVal - lowerKnobVal);
-	float outputRange = upperFloatVal - lowerFloatVal;
-	newData = 0;
-	return lowerFloatVal + (inputPercent * outputRange);
-}
-
-void Windowed10BitKnob::setLowerKnobVal( uint16_t input )
-{
-	if( input < 0 )input = 0;
-	if( input > 1023 )input = 1023;
-	lowerKnobVal = input;
-}
-
-void Windowed10BitKnob::setUpperKnobVal( uint16_t input )
-{
-	if( input < 0 )input = 0;
-	if( input > 1023 )input = 1023;
-	upperKnobVal = input;
-}
-
-void Windowed10BitKnob::setLowerFloatVal( float input )
-{
-	lowerFloatVal = input;
-}
-
-void Windowed10BitKnob::setUpperFloatVal( float input )
-{
-	upperFloatVal = input;
-}
-
-void Windowed10BitKnob::setLowerIntVal( int16_t input )
-{
-	lowerIntVal = input;
-}
-
-void Windowed10BitKnob::setUpperIntVal( int16_t input )
-{
-	upperIntVal = input;
-}
-
-void Windowed10BitKnob::setLowerUIntVal( uint16_t input )
-{
-	lowerUIntVal = input;
-}
-
-void Windowed10BitKnob::setUpperUIntVal( uint16_t input )
-{
-	upperUIntVal = input;
 }
 
 void Windowed10BitKnob::setSamplesAveraged( uint8_t input )
