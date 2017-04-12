@@ -6,11 +6,13 @@ A collection of useful code for developing applications for microcontrollers, es
 Repository Contents
 -------------------
 
-* **/examples** - Example sketches for the library (.ino). Run these from the Arduino IDE. 
-* **/extras** - Additional documentation for the user. These files are ignored by the IDE.
-* **/src** - Source files for the library (.cpp, .h).
-* **keywords.txt** - Keywords from this library that will be highlighted in the Arduino IDE. 
-* **library.properties** - General library properties for the Arduino package manager. 
+* **/examples** - Example sketches for the library (.ino).
+* **/extras** - Diagrams + stalled development examples
+* **/src** - Source files (.cpp, .h).
+* **keywords.txt** - For Arduino IDE. 
+* **library.properties** - For Arduino package manager. 
+* **LICENSE.md**
+* **README.md**
 
 Examples
 -------------------
@@ -33,10 +35,11 @@ Compatibility
 --------------
 
 Tested on Uno and Teensy 3.x
- Arduino version 1.8.1
- Teensyduino version 1.35
 
-Examples designed for Uno
+* Arduino version 1.8.1
+* Teensyduino version 1.35
+
+Examples designed for Uno.
  
 Documentation
 --------------
