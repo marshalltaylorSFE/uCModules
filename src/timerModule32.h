@@ -21,7 +21,7 @@
 class TimerClass32
 {
     int8_t flag;
-    uint32_t lastService;
+    int32_t lastService;
     int32_t interval;
 public:
     TimerClass32( uint32_t );

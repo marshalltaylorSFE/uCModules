@@ -9,10 +9,15 @@
 //
 //**********************************************************************//
 
+//Define TM32_DEBUG to get serial debug info regarding time and state
+//#define TM32_DEBUG
+
 
 //Includes
 #include "timerModule32.h"
-
+#ifdef TM32_DEBUG
+#include <Arduino.h>
+#endif
 extern uint32_t maxTimer;
 extern uint32_t maxInterval;
 
@@ -31,19 +36,27 @@ TimerClass32::TimerClass32( uint32_t intervalVar )
 void TimerClass32::update( uint32_t usTicksInput )
 {
     //Check if overflow has occurred
-    if( usTicksInput < lastService )  //overflow has occurred
+    if( (int32_t) usTicksInput < lastService )  //overflow has occurred
     {
         //Adjust as if nothing ever happened
         lastService = lastService - maxTimer;
+#ifdef TM32_DEBUG
+		Serial.println("OVF:");
+		Serial.println(usTicksInput);
+		Serial.println(lastService);
+#endif
     }
 
-    //Now process knowing an overflow has been dealt with if present
-    if( usTicksInput >= (lastService + interval) )
+    //seek until present
+    while( usTicksInput >= (lastService + interval) )
     {
         //Timer has expired
         //Save the last service time
         lastService = lastService + interval;
         //Ready the flag
+#ifdef TM32_DEBUG
+		if( flag == PENDING ) Serial.println("SV_DPD");
+#endif		
         if( flag == WAITING )
         {
             flag = PENDING;

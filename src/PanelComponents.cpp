@@ -33,6 +33,17 @@ void Button::setHardware( GenericHardwareDescription * input, bool invertInput )
 {
 	hardwareInterface = input;
 	invert = invertInput;
+	
+	freshen( 1 );
+	
+	state = BUTTONOFF;
+
+	risingEdgeFlag = 0;
+	fallingEdgeFlag = 0;
+	holdRisingEdgeFlag = 0;
+	holdFallingEdgeFlag = 0;
+	beingHeld = 0;
+
 }
 
 bool Button::hasFreshData( void )
